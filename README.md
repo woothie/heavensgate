@@ -1,17 +1,17 @@
-# vgstation
+# nullstation
 
-[Website](http://ss13.pomf.se) - [Code](http://github.com/d3athrow/vgstation13/) - [IRC](irc://irc.rizon.net/vgstation) (irc.rizon.net #vgstation)
+[Website](http://station.nullquery.net) - [Code](http://github.com/nullstation/nullstation/)
 
 ---
  
 ### GETTING THE CODE
 The simplest way to obtain the code is using the github .zip feature.
 
-Click [here](https://github.com/d3athrow/vgstation13/archive/master.zip) to get the latest stable code as a .zip file, then unzip it to wherever you want.
+Click [here](https://github.com/nullstation/nullstation/archive/master.zip) to get the latest stable code as a .zip file, then unzip it to wherever you want.
 
 The more complicated and easier to update method is using git.  You'll need to download git or some client from [here](http://git-scm.com/).  When that's installed, right click in any folder and click on "Git Bash".  When that opens, type in:
 
-    git clone https://github.com/d3athrow/vgstation13.git
+    git clone https://github.com/nullstation/nullstation.git
 
 (hint: hold down ctrl and press insert to paste into git bash)
 
@@ -21,20 +21,19 @@ This will take a while to download, but it provides an easier method for updatin
 
 Keep in mind that we have multiple branches for various purposes.
 
-* *master* - "stable" code, it was used on the main server until we realized we like living on the edge  :sunglasses:.
-* *Bleeding-Edge* - The latest unstable code.  _Please do any development against this branch!_
+* *master* - "stable" code, this is running on the main server
 
 ### INSTALLATION
 
 First-time installation should be fairly straightforward.  First, you'll need BYOND installed.  You can get it from [here](http://www.byond.com/).
 
-This is a sourcecode-only release, so the next step is to compile the server files.  Open vgstation13.dme by double-clicking it, open the Build menu, and click compile.  This'll take a little while, and if everything's done right you'll get a message like this:
+This is a source-code-only release, so the next step is to compile the server files.  Open nullstation.dme by double-clicking it, open the Build menu, and click compile.  This'll take a little while, and if everything's done right you'll get a message like this:
 
-    saving vgstation13.dmb (DEBUG mode)
+    saving nullstation.dmb (DEBUG mode)
     
-    vgstation13.dmb - 0 errors, 0 warnings
+    nullstation.dmb - 0 errors, 0 warnings
 
-If you see any errors or warnings, something has gone wrong - possibly a corrupt download or the files extracted wrong, or a code issue on the main repo.  Ask on IRC.
+If you see any errors or warnings, something has gone wrong - possibly a corrupt download or the files extracted wrong, or a code issue on the main repo.
 
 To use the sqlite preferences, rename players2_empty.sqlite to players2.sqlite
 
