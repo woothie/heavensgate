@@ -3,6 +3,11 @@
 	name = "captain's gloves"
 	icon_state = "captain"
 	item_state = "egloves"
+	item_color = "captain"
+	cold_protection = HANDS
+	min_cold_protection_temperature = GLOVES_MIN_COLD_PROTECTION_TEMPERATURE
+	heat_protection = HANDS
+	max_heat_protection_temperature = GLOVES_MAX_HEAT_PROTECTION_TEMPERATURE
 
 /obj/item/clothing/gloves/cyborg
 	desc = "beep boop borp"
@@ -16,7 +21,7 @@
 	name = "\improper SWAT Gloves"
 	icon_state = "black"
 	item_state = "swat_gl"
-	siemens_coefficient = 0.50
+	siemens_coefficient = 0.6
 	permeability_coefficient = 0.05
 
 	cold_protection = HANDS
@@ -41,13 +46,17 @@
 	desc = "Sterile latex gloves."
 	icon_state = "latex"
 	item_state = "lgloves"
-	siemens_coefficient = 1.0 //thin latex gloves, much more conductive than fabric gloves (basically a capacitor for AC)
+	siemens_coefficient = 0.30
 	permeability_coefficient = 0.01
+	item_color="white"
 	germ_level = 0
+	cmo
+		item_color = "medical"		//Exists for washing machines. Is not different from latex gloves in any way.
+
 /obj/item/clothing/gloves/botanic_leather
-	desc = "These leather work gloves protect against thorns, barbs, prickles, spikes and other harmful objects of floral origin."
+	desc = "These leather gloves protect against thorns, barbs, prickles, spikes and other harmful objects of floral origin."
 	name = "botanist's leather gloves"
 	icon_state = "leather"
 	item_state = "ggloves"
-	permeability_coefficient = 0.05
-	siemens_coefficient = 0.50 //thick work gloves
+	permeability_coefficient = 0.9
+	siemens_coefficient = 0.9

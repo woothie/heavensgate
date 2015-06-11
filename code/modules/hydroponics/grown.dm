@@ -29,7 +29,7 @@
 		sleep(250) // ugly hack, should mean roundstart plants are fine.
 	if(!plant_controller)
 		world << "<span class='danger'>Plant controller does not exist and [src] requires it. Aborting.</span>"
-		qdel(src)
+		del(src)
 		return
 
 	seed = plant_controller.seeds[plantname]
@@ -65,7 +65,7 @@
 		sleep(250) // ugly hack, should mean roundstart plants are fine.
 	if(!plant_controller)
 		world << "<span class='danger'>Plant controller does not exist and [src] requires it. Aborting.</span>"
-		qdel(src)
+		del(src)
 		return
 
 	if(plant_controller.product_descs["[seed.uid]"])
@@ -98,7 +98,7 @@
 			descriptors |= "shiny"
 		if(reagents.has_reagent("lube"))
 			descriptors |= "slippery"
-		if(reagents.has_reagent("pacid") || reagents.has_reagent("sacid") || reagents.has_reagent("hclacid"))
+		if(reagents.has_reagent("pacid") || reagents.has_reagent("sacid"))
 			descriptors |= "acidic"
 		if(seed.get_trait(TRAIT_JUICY))
 			descriptors |= "juicy"
@@ -163,7 +163,7 @@
 			M.Weaken(5)
 			seed.thrown_at(src,M)
 			sleep(-1)
-			if(src) qdel(src)
+			if(src) del(src)
 			return
 
 /obj/item/weapon/reagent_containers/food/snacks/grown/throw_impact(atom/hit_atom)
@@ -183,43 +183,43 @@
 					user.put_in_hands(pocell)
 				pocell.maxcharge = src.potency * 10
 				pocell.charge = pocell.maxcharge
-				qdel(src)
+				del(src)
 				return
 		else if(W.sharp)
 			if(seed.kitchen_tag == "pumpkin") // Ugggh these checks are awful.
 				user.show_message("<span class='notice'>You carve a face into [src]!</span>", 1)
 				new /obj/item/clothing/head/pumpkinhead (user.loc)
-				qdel(src)
+				del(src)
 				return
 			else if(seed.chems)
-				if(istype(W,/obj/item/weapon/material/hatchet) && !isnull(seed.chems["woodpulp"]))
+				if(istype(W,/obj/item/weapon/hatchet) && !isnull(seed.chems["woodpulp"]))
 					user.show_message("<span class='notice'>You make planks out of \the [src]!</span>", 1)
 					for(var/i=0,i<2,i++)
-						var/obj/item/stack/material/wood/NG = new (user.loc)
+						var/obj/item/stack/sheet/wood/NG = new (user.loc)
 						NG.color = seed.get_trait(TRAIT_PRODUCT_COLOUR)
-						for (var/obj/item/stack/material/wood/G in user.loc)
+						for (var/obj/item/stack/sheet/wood/G in user.loc)
 							if(G==NG)
 								continue
 							if(G.amount>=G.max_amount)
 								continue
 							G.attackby(NG, user)
 						user << "You add the newly-formed wood to the stack. It now contains [NG.amount] planks."
-					qdel(src)
+					del(src)
 					return
 				else if(!isnull(seed.chems["potato"]))
 					user << "You slice \the [src] into sticks."
 					new /obj/item/weapon/reagent_containers/food/snacks/rawsticks(get_turf(src))
-					qdel(src)
+					del(src)
 					return
 				else if(!isnull(seed.chems["carrotjuice"]))
 					user << "You slice \the [src] into sticks."
 					new /obj/item/weapon/reagent_containers/food/snacks/carrotfries(get_turf(src))
-					qdel(src)
+					del(src)
 					return
 				else if(!isnull(seed.chems["soymilk"]))
 					user << "You roughly chop up \the [src]."
 					new /obj/item/weapon/reagent_containers/food/snacks/soydope(get_turf(src))
-					qdel(src)
+					del(src)
 					return
 	..()
 
@@ -227,7 +227,7 @@
 	if(user == M)
 		return ..()
 
-	if(user.a_intent == I_HURT)
+	if(user.a_intent == "hurt")
 
 		// This is being copypasted here because reagent_containers (WHY DOES FOOD DESCEND FROM THAT) overrides it completely.
 		// TODO: refactor all food paths to be less horrible and difficult to work with in this respect. ~Z
@@ -276,7 +276,7 @@
 				if(user)
 					user << "<span class='danger'>\The [src] has fallen to bits.</span>"
 					user.drop_from_inventory(src)
-				qdel(src)
+				del(src)
 
 		add_fingerprint(user)
 		return 1
@@ -292,11 +292,11 @@
 	if(istype(user.loc,/turf/space))
 		return
 
-	if(user.a_intent == I_HURT)
+	if(user.a_intent == "hurt")
 		user.visible_message("<span class='danger'>\The [user] squashes \the [src]!</span>")
 		seed.thrown_at(src,user)
 		sleep(-1)
-		if(src) qdel(src)
+		if(src) del(src)
 		return
 
 	if(seed.kitchen_tag == "grass")
@@ -311,13 +311,13 @@
 					continue
 				NG.attackby(G, user)
 			user << "You add the newly-formed grass to the stack. It now contains [G.amount] tiles."
-		qdel(src)
+		del(src)
 		return
 
 	if(seed.get_trait(TRAIT_SPREAD) > 0)
 		user << "<span class='notice'>You plant the [src.name].</span>"
 		new /obj/machinery/portable_atmospherics/hydroponics/soil/invisible(get_turf(user),src.seed)
-		qdel(src)
+		del(src)
 		return
 
 	/*
@@ -327,13 +327,13 @@
 				var/obj/item/stack/medical/bruise_pack/tajaran/poultice = new /obj/item/stack/medical/bruise_pack/tajaran(user.loc)
 				poultice.heal_brute = potency
 				user << "<span class='notice'>You mash the leaves into a poultice.</span>"
-				qdel(src)
+				del(src)
 				return
 			if("mtear")
 				var/obj/item/stack/medical/ointment/tajaran/poultice = new /obj/item/stack/medical/ointment/tajaran(user.loc)
 				poultice.heal_burn = potency
 				user << "<span class='notice'>You mash the petals into a poultice.</span>"
-				qdel(src)
+				del(src)
 				return
 	*/
 
@@ -341,6 +341,9 @@
 	..()
 	if(!seed)
 		return
+	if(seed.get_trait(TRAIT_BIOLUM))
+		user.SetLuminosity(user.luminosity + seed.get_trait(TRAIT_BIOLUM))
+		SetLuminosity(0)
 	if(seed.get_trait(TRAIT_STINGS))
 		var/mob/living/carbon/human/H = user
 		if(istype(H) && H.gloves)
@@ -350,6 +353,12 @@
 		reagents.remove_any(rand(1,3)) //Todo, make it actually remove the reagents the seed uses.
 		seed.do_thorns(H,src)
 		seed.do_sting(H,src,pick("r_hand","l_hand"))
+
+/obj/item/weapon/reagent_containers/food/snacks/grown/dropped(mob/user)
+	..()
+	if(seed && seed.get_trait(TRAIT_BIOLUM))
+		user.SetLuminosity(user.luminosity - seed.get_trait(TRAIT_BIOLUM))
+		SetLuminosity(seed.get_trait(TRAIT_BIOLUM))
 
 // Predefined types for placing on the map.
 

@@ -14,7 +14,7 @@
 		..(loc, h)
 
 
-	Destroy()
+	Del()
 		blob_nodes -= src
 		processing_objects.Remove(src)
 		..()
@@ -24,7 +24,7 @@
 	update_icon()
 		if(health <= 0)
 			playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
-			qdel(src)
+			del(src)
 			return
 		return
 

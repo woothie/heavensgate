@@ -25,12 +25,12 @@
 	switch(severity)
 		if(1.0)
 			//SN src = null
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if (prob(50))
 				//SN src = null
-				qdel(src)
+				del(src)
 				return
 		else
 	return
@@ -118,11 +118,11 @@
 			if (src.connected)
 				if (src.connected.occupant)
 					if (src.connected.occupant.stat == DEAD)
-						usr << "<span class='danger'>This person has no life for to preserve anymore. Take them to a department capable of reanimating them.</span>"
+						usr << "\red \b This person has no life for to preserve anymore. Take them to a department capable of reanimating them."
 					else if(src.connected.occupant.health > 0 || href_list["chemical"] == "inaprovaline")
 						src.connected.inject_chemical(usr,href_list["chemical"],text2num(href_list["amount"]))
 					else
-						usr << "<span class='danger'>This person is not in good enough condition for sleepers to be effective! Use another means of treatment, such as cryogenics!</span>"
+						usr << "\red \b This person is not in good enough condition for sleepers to be effective! Use another means of treatment, such as cryogenics!"
 					src.updateUsrDialog()
 		if (href_list["refresh"])
 			src.updateUsrDialog()
@@ -191,10 +191,10 @@
 				if(beaker.reagents.total_volume < beaker.reagents.maximum_volume)
 					var/pumped = 0
 					for(var/datum/reagent/x in src.occupant.reagents.reagent_list)
-						src.occupant.reagents.trans_to_obj(beaker, 3)
+						src.occupant.reagents.trans_to(beaker, 3)
 						pumped++
 					if (ishuman(src.occupant))
-						src.occupant.vessel.trans_to_obj(beaker, pumped + 1)
+						src.occupant.vessel.trans_to(beaker, pumped + 1)
 		src.updateUsrDialog()
 		return
 
@@ -204,7 +204,7 @@
 			for(var/atom/movable/A as mob|obj in src)
 				A.loc = src.loc
 				A.blob_act()
-			qdel(src)
+			del(src)
 		return
 
 	attackby(var/obj/item/weapon/G as obj, var/mob/user as mob)
@@ -217,7 +217,7 @@
 				src.updateUsrDialog()
 				return
 			else
-				user << "<span class='warning'>The sleeper has a beaker already.</span>"
+				user << "\red The sleeper has a beaker already."
 				return
 
 		else if(istype(G, /obj/item/weapon/grab))
@@ -225,7 +225,7 @@
 				return
 
 			if(src.occupant)
-				user << "<span class='warning'>The sleeper is already occupied!</span>"
+				user << "\blue <B>The sleeper is already occupied!</B>"
 				return
 
 			for(var/mob/living/carbon/slime/M in range(1,G:affecting))
@@ -237,7 +237,7 @@
 
 			if(do_after(user, 20))
 				if(src.occupant)
-					user << "<span class='warning'>The sleeper is already occupied!</span>"
+					user << "\blue <B>The sleeper is already occupied!</B>"
 					return
 				if(!G || !G:affecting) return
 				var/mob/M = G:affecting
@@ -252,7 +252,7 @@
 					icon_state = "sleeper_1-r"
 
 				src.add_fingerprint(user)
-				qdel(G)
+				del(G)
 			return
 		return
 
@@ -265,21 +265,21 @@
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = src.loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 			if(2.0)
 				if(prob(50))
 					for(var/atom/movable/A as mob|obj in src)
 						A.loc = src.loc
 						ex_act(severity)
-					qdel(src)
+					del(src)
 					return
 			if(3.0)
 				if(prob(25))
 					for(var/atom/movable/A as mob|obj in src)
 						A.loc = src.loc
 						ex_act(severity)
-					qdel(src)
+					del(src)
 					return
 		return
 	emp_act(severity)
@@ -350,7 +350,7 @@
 
 	proc/check(mob/living/user as mob)
 		if(src.occupant)
-			user << text("<span class='notice'><B>Occupant ([]) Statistics:</B></span>", src.occupant)
+			user << text("\blue <B>Occupant ([]) Statistics:</B>", src.occupant)
 			var/t1
 			switch(src.occupant.stat)
 				if(0.0)
@@ -360,20 +360,20 @@
 				if(2.0)
 					t1 = "*dead*"
 				else
-			user << text("<span class='[]'>\t Health %: [] ([])</span>", (src.occupant.health > 50 ? "notice" : "warning"), src.occupant.health, t1)
-			user << text("<span class='[]'>\t -Core Temperature: []&deg;C ([]&deg;F)</span>", (src.occupant.bodytemperature > 50 ? "notice" : "warning"), src.occupant.bodytemperature-T0C, src.occupant.bodytemperature*1.8-459.67)
-			user << text("<span class='[]'>\t -Brute Damage %: []</span>", (src.occupant.getBruteLoss() < 60 ? "notice" : "warning"), src.occupant.getBruteLoss())
-			user << text("<span class='[]'>\t -Respiratory Damage %: []</span>", (src.occupant.getOxyLoss() < 60 ? "notice" : "warning"), src.occupant.getOxyLoss())
-			user << text("<span class='[]'>\t -Toxin Content %: []</span>", (src.occupant.getToxLoss() < 60 ? "notice" : "warning"), src.occupant.getToxLoss())
-			user << text("<span class='[]'>\t -Burn Severity %: []</span>", (src.occupant.getFireLoss() < 60 ? "notice" : "warning"), src.occupant.getFireLoss())
-			user << "<span class='notice'>Expected time till occupant can safely awake: (note: If health is below 20% these times are inaccurate)</span>"
-			user << text("<span class='notice'>\t [] second\s (if around 1 or 2 the sleeper is keeping them asleep.)</span>", src.occupant.paralysis / 5)
+			user << text("[]\t Health %: [] ([])", (src.occupant.health > 50 ? "\blue " : "\red "), src.occupant.health, t1)
+			user << text("[]\t -Core Temperature: []&deg;C ([]&deg;F)</FONT><BR>", (src.occupant.bodytemperature > 50 ? "<font color='blue'>" : "<font color='red'>"), src.occupant.bodytemperature-T0C, src.occupant.bodytemperature*1.8-459.67)
+			user << text("[]\t -Brute Damage %: []", (src.occupant.getBruteLoss() < 60 ? "\blue " : "\red "), src.occupant.getBruteLoss())
+			user << text("[]\t -Respiratory Damage %: []", (src.occupant.getOxyLoss() < 60 ? "\blue " : "\red "), src.occupant.getOxyLoss())
+			user << text("[]\t -Toxin Content %: []", (src.occupant.getToxLoss() < 60 ? "\blue " : "\red "), src.occupant.getToxLoss())
+			user << text("[]\t -Burn Severity %: []", (src.occupant.getFireLoss() < 60 ? "\blue " : "\red "), src.occupant.getFireLoss())
+			user << "\blue Expected time till occupant can safely awake: (note: If health is below 20% these times are inaccurate)"
+			user << text("\blue \t [] second\s (if around 1 or 2 the sleeper is keeping them asleep.)", src.occupant.paralysis / 5)
 			if(src.beaker)
-				user << text("<span class='notice'>\t Dialysis Output Beaker has [] of free space remaining.</span>", src.beaker.reagents.maximum_volume - src.beaker.reagents.total_volume)
+				user << text("\blue \t Dialysis Output Beaker has [] of free space remaining.", src.beaker.reagents.maximum_volume - src.beaker.reagents.total_volume)
 			else
-				user << "<span class='notice'>No Dialysis Output Beaker loaded.</span>"
+				user << "\blue No Dialysis Output Beaker loaded."
 		else
-			user << "<span class='notice'>There is no one inside!</span>"
+			user << "\blue There is no one inside!"
 		return
 
 
@@ -408,11 +408,11 @@
 		set category = "Object"
 		set src in oview(1)
 
-		if(usr.stat != 0 || !(ishuman(usr) || issmall(usr)))
+		if(usr.stat != 0 || !(ishuman(usr) || ismonkey(usr)))
 			return
 
 		if(src.occupant)
-			usr << "<span class='warning'>The sleeper is already occupied!</span>"
+			usr << "\blue <B>The sleeper is already occupied!</B>"
 			return
 
 		for(var/mob/living/carbon/slime/M in range(1,usr))
@@ -422,7 +422,7 @@
 		visible_message("[usr] starts climbing into the sleeper.", 3)
 		if(do_after(usr, 20))
 			if(src.occupant)
-				usr << "<span class='warning'>The sleeper is already occupied!</span>"
+				usr << "\blue <B>The sleeper is already occupied!</B>"
 				return
 			usr.stop_pulling()
 			usr.client.perspective = EYE_PERSPECTIVE
@@ -435,7 +435,7 @@
 				icon_state = "sleeper_1-r"
 
 			for(var/obj/O in src)
-				qdel(O)
+				del(O)
 			src.add_fingerprint(usr)
 			return
 		return

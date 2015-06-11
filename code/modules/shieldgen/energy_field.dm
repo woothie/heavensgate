@@ -17,7 +17,7 @@
 	..()
 	update_nearby_tiles()
 
-/obj/effect/energy_field/Destroy()
+/obj/effect/energy_field/Del()
 	update_nearby_tiles()
 	..()
 
@@ -26,6 +26,11 @@
 
 /obj/effect/energy_field/bullet_act(var/obj/item/projectile/Proj)
 	Stress(Proj.damage / 10)
+
+/obj/effect/energy_field/meteorhit(obj/effect/meteor/M as obj)
+	if(M)
+		walk(M,0)
+		Stress(2)
 
 /obj/effect/energy_field/proc/Stress(var/severity)
 	strength -= severity

@@ -9,8 +9,11 @@
 	var/circuit = null //The path to the circuit board type. If circuit==null, the computer can't be disassembled.
 	var/processing = 0
 
-	var/light_range_on = 3
-	var/light_power_on = 1
+/obj/machinery/computer/New()
+	..()
+	if(ticker)
+		initialize()
+
 
 /obj/machinery/computer/initialize()
 	power_change()
@@ -20,6 +23,16 @@
 		return 0
 	return 1
 
+/obj/machinery/computer/meteorhit(var/obj/O as obj)
+	for(var/x in verbs)
+		verbs -= x
+	set_broken()
+	var/datum/effect/effect/system/smoke_spread/smoke = new /datum/effect/effect/system/smoke_spread()
+	smoke.set_up(5, 0, src)
+	smoke.start()
+	return
+
+
 /obj/machinery/computer/emp_act(severity)
 	if(prob(20/severity)) set_broken()
 	..()
@@ -28,11 +41,11 @@
 /obj/machinery/computer/ex_act(severity)
 	switch(severity)
 		if(1.0)
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if (prob(25))
-				qdel(src)
+				del(src)
 				return
 			if (prob(50))
 				for(var/x in verbs)
@@ -79,10 +92,6 @@
 /obj/machinery/computer/power_change()
 	..()
 	update_icon()
-	if(stat & NOPOWER)
-		set_light(0)
-	else
-		set_light(light_range_on, light_power_on)
 
 
 /obj/machinery/computer/proc/set_broken()
@@ -114,16 +123,16 @@
 			for (var/obj/C in src)
 				C.loc = src.loc
 			if (src.stat & BROKEN)
-				user << "<span class='notice'>The broken glass falls out.</span>"
-				new /obj/item/weapon/material/shard( src.loc )
+				user << "\blue The broken glass falls out."
+				new /obj/item/weapon/shard( src.loc )
 				A.state = 3
 				A.icon_state = "3"
 			else
-				user << "<span class='notice'>You disconnect the monitor.</span>"
+				user << "\blue You disconnect the monitor."
 				A.state = 4
 				A.icon_state = "4"
 			M.deconstruct(src)
-			qdel(src)
+			del(src)
 	else
 		src.attack_hand(user)
 	return

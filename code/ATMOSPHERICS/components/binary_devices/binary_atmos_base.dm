@@ -44,15 +44,15 @@ obj/machinery/atmospherics/binary
 
 		return null
 
-	Destroy()
+	Del()
 		loc = null
 
 		if(node1)
 			node1.disconnect(src)
-			qdel(network1)
+			del(network1)
 		if(node2)
 			node2.disconnect(src)
-			qdel(network2)
+			del(network2)
 
 		node1 = null
 		node2 = null
@@ -123,11 +123,11 @@ obj/machinery/atmospherics/binary
 
 	disconnect(obj/machinery/atmospherics/reference)
 		if(reference==node1)
-			qdel(network1)
+			del(network1)
 			node1 = null
 
 		else if(reference==node2)
-			qdel(network2)
+			del(network2)
 			node2 = null
 
 		update_icon()

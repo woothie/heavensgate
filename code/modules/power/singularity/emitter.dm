@@ -1,7 +1,7 @@
 #define EMITTER_DAMAGE_POWER_TRANSFER 450 //used to transfer power to containment field generators
 
 /obj/machinery/power/emitter
-	name = "emitter"
+	name = "Emitter"
 	desc = "It is a heavy duty industrial laser."
 	icon = 'icons/obj/singularity.dmi'
 	icon_state = "emitter"
@@ -41,7 +41,7 @@
 	if(state == 2 && anchored)
 		connect_to_network()
 
-/obj/machinery/power/emitter/Destroy()
+/obj/machinery/power/emitter/Del()
 	message_admins("Emitter deleted at ([x],[y],[z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)",0,1)
 	log_game("Emitter deleted at ([x],[y],[z])")
 	investigate_log("<font color='red'>deleted</font> at ([x],[y],[z])","singulo")
@@ -60,18 +60,18 @@
 /obj/machinery/power/emitter/proc/activate(mob/user as mob)
 	if(state == 2)
 		if(!powernet)
-			user << "\The [src] isn't connected to a wire."
+			user << "The emitter isn't connected to a wire."
 			return 1
 		if(!src.locked)
 			if(src.active==1)
 				src.active = 0
-				user << "You turn off [src]."
+				user << "You turn off the [src]."
 				message_admins("Emitter turned off by [key_name(user, user.client)](<A HREF='?_src_=holder;adminmoreinfo=\ref[user]'>?</A>) in ([x],[y],[z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)",0,1)
 				log_game("Emitter turned off by [user.ckey]([user]) in ([x],[y],[z])")
 				investigate_log("turned <font color='red'>off</font> by [user.key]","singulo")
 			else
 				src.active = 1
-				user << "You turn on [src]."
+				user << "You turn on the [src]."
 				src.shot_number = 0
 				src.fire_delay = 100
 				message_admins("Emitter turned on by [key_name(user, user.client)](<A HREF='?_src_=holder;adminmoreinfo=\ref[user]'>?</A>) in ([x],[y],[z] - <A HREF='?_src_=holder;adminplayerobservecoodjump=1;X=[x];Y=[y];Z=[z]'>JMP</a>)",0,1)
@@ -79,9 +79,9 @@
 				investigate_log("turned <font color='green'>on</font> by [user.key]","singulo")
 			update_icon()
 		else
-			user << "<span class='warning'>The controls are locked!</span>"
+			user << "\red The controls are locked!"
 	else
-		user << "<span class='warning'>\The [src] needs to be firmly secured to the floor first.</span>"
+		user << "\red The [src] needs to be firmly secured to the floor first."
 		return 1
 
 
@@ -92,6 +92,9 @@
 			src.active = 0
 			src.use_power = 1	*/
 	return 1
+
+/obj/machinery/containment_field/meteorhit()
+	return 0
 
 /obj/machinery/power/emitter/process()
 	if(stat & (BROKEN))
@@ -135,83 +138,86 @@
 			s.set_up(5, 1, src)
 			s.start()
 		A.set_dir(src.dir)
-		A.starting = get_turf(src)
 		switch(dir)
 			if(NORTH)
-				A.original = locate(x, y+1, z)
+				A.yo = 20
+				A.xo = 0
 			if(EAST)
-				A.original = locate(x+1, y, z)
+				A.yo = 0
+				A.xo = 20
 			if(WEST)
-				A.original = locate(x-1, y, z)
+				A.yo = 0
+				A.xo = -20
 			else // Any other
-				A.original = locate(x, y-1, z)
-		A.process()
+				A.yo = -20
+				A.xo = 0
+		A.process()	//TODO: Carn: check this out
 
 
 /obj/machinery/power/emitter/attackby(obj/item/W, mob/user)
 
 	if(istype(W, /obj/item/weapon/wrench))
 		if(active)
-			user << "Turn off [src] first."
+			user << "Turn off the [src] first."
 			return
 		switch(state)
 			if(0)
 				state = 1
 				playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
-				user.visible_message("[user.name] secures [src] to the floor.", \
+				user.visible_message("[user.name] secures [src.name] to the floor.", \
 					"You secure the external reinforcing bolts to the floor.", \
 					"You hear a ratchet")
 				src.anchored = 1
 			if(1)
 				state = 0
 				playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
-				user.visible_message("[user.name] unsecures [src] reinforcing bolts from the floor.", \
+				user.visible_message("[user.name] unsecures [src.name] reinforcing bolts from the floor.", \
 					"You undo the external reinforcing bolts.", \
 					"You hear a ratchet")
 				src.anchored = 0
 			if(2)
-				user << "<span class='warning'>\The [src] needs to be unwelded from the floor.</span>"
+				user << "\red The [src.name] needs to be unwelded from the floor."
 		return
 
 	if(istype(W, /obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/WT = W
 		if(active)
-			user << "Turn off [src] first."
+			user << "Turn off the [src] first."
 			return
 		switch(state)
 			if(0)
-				user << "<span class='warning'>\The [src] needs to be wrenched to the floor.</span>"
+				user << "\red The [src.name] needs to be wrenched to the floor."
 			if(1)
 				if (WT.remove_fuel(0,user))
 					playsound(src.loc, 'sound/items/Welder2.ogg', 50, 1)
-					user.visible_message("[user.name] starts to weld [src] to the floor.", \
-						"You start to weld [src] to the floor.", \
+					user.visible_message("[user.name] starts to weld the [src.name] to the floor.", \
+						"You start to weld the [src] to the floor.", \
 						"You hear welding")
 					if (do_after(user,20))
 						if(!src || !WT.isOn()) return
 						state = 2
-						user << "You weld [src] to the floor."
+						user << "You weld the [src] to the floor."
 						connect_to_network()
 				else
-					user << "<span class='warning'>You need more welding fuel to complete this task.</span>"
+					user << "\red You need more welding fuel to complete this task."
 			if(2)
 				if (WT.remove_fuel(0,user))
 					playsound(src.loc, 'sound/items/Welder2.ogg', 50, 1)
-					user.visible_message("[user.name] starts to cut [src] free from the floor.", \
-						"You start to cut [src] free from the floor.", \
+					user.visible_message("[user.name] starts to cut the [src.name] free from the floor.", \
+						"You start to cut the [src] free from the floor.", \
 						"You hear welding")
 					if (do_after(user,20))
 						if(!src || !WT.isOn()) return
 						state = 1
-						user << "You cut [src] free from the floor."
+						user << "You cut the [src] free from the floor."
 						disconnect_from_network()
 				else
-					user << "<span class='warning'>You need more welding fuel to complete this task.</span>"
+					user << "\red You need more welding fuel to complete this task."
 		return
 
 	if(istype(W, /obj/item/weapon/card/id) || istype(W, /obj/item/device/pda))
 		if(emagged)
-			user << "<span class='warning'>The lock seems to be broken.</span>"
+			user << "\red The lock seems to be broken"
 			return
 		if(src.allowed(user))
 			if(active)
@@ -219,16 +225,16 @@
 				user << "The controls are now [src.locked ? "locked." : "unlocked."]"
 			else
 				src.locked = 0 //just in case it somehow gets locked
-				user << "<span class='warning'>The controls can only be locked when [src] is online.</span>"
+				user << "\red The controls can only be locked when the [src] is online"
 		else
-			user << "<span class='warning'>Access denied.</span>"
+			user << "\red Access denied."
 		return
 
 
 	if(istype(W, /obj/item/weapon/card/emag) && !emagged)
 		locked = 0
 		emagged = 1
-		user.visible_message("[user.name] emags [src].","<span class='warning'>You short out the lock.</span>")
+		user.visible_message("[user.name] emags the [src.name].","\red You short out the lock.")
 		return
 
 	..()

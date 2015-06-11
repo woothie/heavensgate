@@ -34,7 +34,7 @@
 		if (src.client.handle_spam_prevention(message,MUTE_IC))
 			return 0
 
-	message = sanitize(message)
+	message = trim_strip_html_properly(message)
 
 	if (stat == 2)
 		return say_dead(message)
@@ -185,7 +185,7 @@
 		This is another way of saying that we won't bother dealing with them.*/
 	else
 		src << "No holopad connected."
-		return 0
+		return
 	return 1
 
 /mob/living/silicon/ai/proc/holopad_emote(var/message) //This is called when the AI uses the 'me' verb while using a holopad.
@@ -206,7 +206,7 @@
 			M.show_message(rendered, 2)
 	else //This shouldn't occur, but better safe then sorry.
 		src << "No holopad connected."
-		return 0
+		return
 	return 1
 
 /mob/living/silicon/ai/emote(var/act, var/type, var/message)

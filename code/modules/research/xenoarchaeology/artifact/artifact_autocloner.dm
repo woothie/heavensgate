@@ -39,7 +39,8 @@
 		/mob/living/simple_animal/slime,\
 		/mob/living/simple_animal/crab,\
 		/mob/living/simple_animal/mouse,\
-		/mob/living/simple_animal/hostile/retaliate/goat\
+		/mob/living/simple_animal/hostile/retaliate/goat,\
+		/mob/living/carbon/monkey\
 		)
 
 //todo: how the hell is the asteroid permanently powered?

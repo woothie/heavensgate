@@ -44,7 +44,7 @@ var/list/forbidden_varedit_object_types = list(
 	switch(class)
 
 		if("text")
-			var_value = input("Enter new text:","Text") as null|text//todo: sanitize ???
+			var_value = input("Enter new text:","Text") as null|text
 
 		if("num")
 			var_value = input("Enter new number:","Num") as null|num
@@ -93,7 +93,7 @@ var/list/forbidden_varedit_object_types = list(
 	switch(class)
 
 		if("text")
-			var_value = input("Enter new text:","Text") as text//todo: sanitize ???
+			var_value = input("Enter new text:","Text") as text
 
 		if("num")
 			var_value = input("Enter new number:","Num") as num
@@ -243,7 +243,7 @@ var/list/forbidden_varedit_object_types = list(
 			return
 
 		if("text")
-			L[L.Find(variable)] = input("Enter new text:","Text") as text//todo: sanitize ???
+			L[L.Find(variable)] = input("Enter new text:","Text") as text
 
 		if("num")
 			L[L.Find(variable)] = input("Enter new number:","Num") as num
@@ -450,15 +450,15 @@ var/list/forbidden_varedit_object_types = list(
 			return .(O.vars[variable])
 
 		if("text")
-			var/var_new = input("Enter new text:","Text",O.vars[variable]) as null|text//todo: sanitize ???
+			var/var_new = input("Enter new text:","Text",O.vars[variable]) as null|text
 			if(var_new==null) return
 			O.vars[variable] = var_new
 
 		if("num")
-			if(variable=="light_range")
+			if(variable=="luminosity")
 				var/var_new = input("Enter new number:","Num",O.vars[variable]) as null|num
 				if(var_new == null) return
-				O.set_light(var_new)
+				O.SetLuminosity(var_new)
 			else if(variable=="stat")
 				var/var_new = input("Enter new number:","Num",O.vars[variable]) as null|num
 				if(var_new == null) return

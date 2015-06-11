@@ -112,10 +112,10 @@
 		else
 			if(node1)
 				node1.disconnect(src)
-				qdel(network1)
+				del(network1)
 			if(node2)
 				node2.disconnect(src)
-				qdel(network2)
+				del(network2)
 
 			node1 = null
 			node2 = null

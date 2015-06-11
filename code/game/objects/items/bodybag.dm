@@ -10,7 +10,7 @@
 	attack_self(mob/user)
 		var/obj/structure/closet/body_bag/R = new /obj/structure/closet/body_bag(user.loc)
 		R.add_fingerprint(user)
-		qdel(src)
+		del(src)
 
 
 /obj/item/weapon/storage/box/bodybags
@@ -49,7 +49,7 @@
 			return
 		if (!in_range(src, user) && src.loc != user)
 			return
-		t = sanitizeSafe(t, MAX_NAME_LEN)
+		t = sanitize(copytext(t,1,MAX_MESSAGE_LEN))
 		if (t)
 			src.name = "body bag - "
 			src.name += t
@@ -83,7 +83,7 @@
 		visible_message("[usr] folds up the [src.name]")
 		new item_path(get_turf(src))
 		spawn(0)
-			qdel(src)
+			del(src)
 		return
 
 /obj/structure/closet/body_bag/update_icon()
@@ -105,7 +105,7 @@
 	attack_self(mob/user)
 		var/obj/structure/closet/body_bag/cryobag/R = new /obj/structure/closet/body_bag/cryobag(user.loc)
 		R.add_fingerprint(user)
-		qdel(src)
+		del(src)
 
 
 
@@ -126,10 +126,10 @@
 		O.icon = src.icon
 		O.icon_state = "bodybag_used"
 		O.desc = "Pretty useless now.."
-		qdel(src)
+		del(src)
 
 /obj/structure/closet/body_bag/cryobag/MouseDrop(over_object, src_location, over_location)
 	if((over_object == usr && (in_range(src, usr) || usr.contents.Find(src))))
 		if(!ishuman(usr))	return
-		usr << "<span class='warning'>You can't fold that up anymore..</span>"
+		usr << "\red You can't fold that up anymore.."
 	..()

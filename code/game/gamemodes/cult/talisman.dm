@@ -7,7 +7,6 @@
 	attack_self(mob/living/user as mob)
 		if(iscultist(user))
 			var/delete = 1
-			// who the hell thought this was a good idea :(
 			switch(imbue)
 				if("newtome")
 					call(/obj/effect/rune/proc/tomesummon)()
@@ -29,14 +28,14 @@
 				if("blind")
 					call(/obj/effect/rune/proc/blind)()
 				if("runestun")
-					user << "<span class='warning'>To use this talisman, attack your target directly.</span>"
+					user << "\red To use this talisman, attack your target directly."
 					return
 				if("supply")
 					supply()
 			user.take_organ_damage(5, 0)
 			if(src && src.imbue!="supply" && src.imbue!="runestun")
 				if(delete)
-					qdel(src)
+					del(src)
 			return
 		else
 			user << "You see strange symbols on the paper. Are they supposed to mean something?"
@@ -48,7 +47,7 @@
 			if(imbue == "runestun")
 				user.take_organ_damage(5, 0)
 				call(/obj/effect/rune/proc/runestun)(T)
-				qdel(src)
+				del(src)
 			else
 				..()   ///If its some other talisman, use the generic attack code, is this supposed to work this way?
 		else
@@ -57,7 +56,7 @@
 
 	proc/supply(var/key)
 		if (!src.uses)
-			qdel(src)
+			del(src)
 			return
 
 		var/dat = "<B>There are [src.uses] bloody runes on the parchment.</B><BR>"
@@ -107,7 +106,7 @@
 				if("soulstone")
 					new /obj/item/device/soulstone(get_turf(usr))
 				if("construct")
-					new /obj/structure/constructshell/cult(get_turf(usr))
+					new /obj/structure/constructshell(get_turf(usr))
 			src.uses--
 			supply()
 		return

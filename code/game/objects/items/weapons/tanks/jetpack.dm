@@ -11,7 +11,7 @@
 	var/on = 0.0
 	var/stabilization_on = 0
 	var/volume_rate = 500              //Needed for borg jetpack transfer
-	action_button_name = "Toggle Jetpack"
+	icon_action_button = "action_jetpack"
 
 /obj/item/weapon/tank/jetpack/New()
 	..()
@@ -23,7 +23,7 @@
 		return
 
 	if(air_contents.gas["oxygen"] < 10)
-		user << text("<span class='danger'>The meter on \the [src] indicates you are almost out of air!</span>")
+		user << text("\red <B>The meter on the [src.name] indicates you are almost out of air!</B>")
 		playsound(user, 'sound/effects/alert.ogg', 50, 1)
 
 /obj/item/weapon/tank/jetpack/verb/toggle_rockets()
@@ -47,7 +47,6 @@
 	if (ismob(usr))
 		var/mob/M = usr
 		M.update_inv_back()
-		M.update_action_buttons()
 
 	usr << "You toggle the thrusters [on? "on":"off"]."
 
@@ -64,7 +63,7 @@
 	if(allgases >= 0.005)
 		return 1
 
-	qdel(G)
+	del(G)
 	return
 
 /obj/item/weapon/tank/jetpack/ui_action_click()
@@ -113,7 +112,7 @@
 		return
 
 	if(air_contents.gas["carbon_dioxide"] < 10)
-		user << text("<span class='danger'>The meter on \the [src] indicates you are almost out of carbon dioxide!</span>")
+		user << text("\red <B>The meter on the [src.name] indicates you are almost out of carbon dioxide!</B>")
 		playsound(user, 'sound/effects/alert.ogg', 50, 1)
 	return
 
@@ -144,5 +143,5 @@
 	var/allgases = G.gas["carbon_dioxide"] + G.gas["nitrogen"] + G.gas["oxygen"] + G.gas["phoron"]
 	if(allgases >= 0.005)
 		return 1
-	qdel(G)
+	del(G)
 	return

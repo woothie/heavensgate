@@ -2,9 +2,10 @@
 	name = "sandbox"
 	config_tag = "sandbox"
 	required_players = 0
-	votable = 0
-	round_description = "Build your own station!"
-	extended_round_description = "You can use the sandbox-panel command to access build options."
+
+/datum/game_mode/sandbox/announce()
+	world << "<B>The current game mode is - Sandbox!</B>"
+	world << "<B>Build your own station with the sandbox-panel command!</B>"
 
 /datum/game_mode/sandbox/pre_setup()
 	for(var/mob/M in player_list)

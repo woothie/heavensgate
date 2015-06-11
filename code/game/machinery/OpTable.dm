@@ -28,12 +28,12 @@
 	switch(severity)
 		if(1.0)
 			//SN src = null
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if (prob(50))
 				//SN src = null
-				qdel(src)
+				del(src)
 				return
 		if(3.0)
 			if (prob(25))
@@ -43,13 +43,14 @@
 
 /obj/machinery/optable/blob_act()
 	if(prob(75))
-		qdel(src)
+		del(src)
 
 /obj/machinery/optable/attack_hand(mob/user as mob)
 	if (HULK in usr.mutations)
-		visible_message("<span class='danger'>\The [usr] destroys \the [src]!</span>")
+		usr << text("\blue You destroy the table.")
+		visible_message("\red [usr] destroys the operating table!")
 		src.density = 0
-		qdel(src)
+		del(src)
 	return
 
 /obj/machinery/optable/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
@@ -86,9 +87,9 @@
 
 /obj/machinery/optable/proc/take_victim(mob/living/carbon/C, mob/living/carbon/user as mob)
 	if (C == user)
-		user.visible_message("[user] climbs on \the [src].","You climb on \the [src].")
+		user.visible_message("[user] climbs on the operating table.","You climb on the operating table.")
 	else
-		visible_message("<span class='notice'>\The [C] has been laid on \the [src] by [user].</span>", 3)
+		visible_message("\red [C] has been laid on the operating table by [user].", 3)
 	if (C.client)
 		C.client.perspective = EYE_PERSPECTIVE
 		C.client.eye = src
@@ -103,16 +104,6 @@
 		icon_state = H.pulse ? "table2-active" : "table2-idle"
 	else
 		icon_state = "table2-idle"
-
-/obj/machinery/optable/MouseDrop_T(mob/target, mob/user)
-
-	var/mob/living/M = user
-	if(user.stat || user.restrained() || !check_table(user) || !iscarbon(target))
-		return
-	if(istype(M))
-		take_victim(target,user)
-	else
-		return ..()
 
 /obj/machinery/optable/verb/climb_on()
 	set name = "Climb On Table"
@@ -129,15 +120,16 @@
 		var/obj/item/weapon/grab/G = W
 		if(iscarbon(G.affecting) && check_table(G.affecting))
 			take_victim(G.affecting,usr)
-			qdel(W)
+			del(W)
 			return
 
 /obj/machinery/optable/proc/check_table(mob/living/carbon/patient as mob)
-	check_victim()
-	if(src.victim && get_turf(victim) == get_turf(src) && victim.lying)
-		usr << "<span class='warning'>\The [src] is already occupied!</span>"
+	if(src.victim)
+		usr << "\blue <B>The table is already occupied!</B>"
 		return 0
+
 	if(patient.buckled)
-		usr << "<span class='notice'>Unbuckle \the [patient] first!</span>"
+		usr << "\blue <B>Unbuckle first!</B>"
 		return 0
+
 	return 1

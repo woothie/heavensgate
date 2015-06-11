@@ -4,7 +4,6 @@
 	name = "prisoner management console"
 	icon = 'icons/obj/computer.dmi'
 	icon_state = "explosive"
-	light_color = "#a91515"
 	req_access = list(access_armory)
 	circuit = "/obj/item/weapon/circuitboard/prisoner"
 	var/id = 0.0
@@ -91,12 +90,12 @@
 					usr << "Unauthorized Access."
 
 			else if(href_list["warn"])
-				var/warning = sanitize(input(usr,"Message:","Enter your message here!",""))
+				var/warning = sanitize(copytext(input(usr,"Message:","Enter your message here!",""),1,MAX_MESSAGE_LEN))
 				if(!warning) return
 				var/obj/item/weapon/implant/I = locate(href_list["warn"])
 				if((I)&&(I.imp_in))
 					var/mob/living/carbon/R = I.imp_in
-					R << "<span class='notice'>You hear a voice in your head saying: '[warning]'</span>"
+					R << "\green You hear a voice in your head saying: '[warning]'"
 
 			src.add_fingerprint(usr)
 		src.updateUsrDialog()

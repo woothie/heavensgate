@@ -35,7 +35,7 @@
 			continue
 		if(!(A.z in config.station_levels))
 			continue
-		if(A.flags & RAD_SHIELDED)
+		if(A.rad_shielded)
 			continue
 
 		if(istype(C,/mob/living/carbon/human))
@@ -49,6 +49,8 @@
 				else
 					randmutg(H) // Applies good mutation
 					domutcheck(H,null,MUTCHK_FORCED)
+		else if(istype(C,/mob/living/carbon/monkey))
+			C.apply_effect((rand(5,25)),IRRADIATE,0)
 
 /datum/event/radiation_storm/end()
 	revoke_maint_all_access()

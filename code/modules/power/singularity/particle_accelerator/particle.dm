@@ -41,14 +41,14 @@
 	if (A)
 		if(ismob(A))
 			toxmob(A)
-		if((istype(A,/obj/machinery/the_singularitygen))||(istype(A,/obj/singularity/)))
+		if((istype(A,/obj/machinery/the_singularitygen))||(istype(A,/obj/machinery/singularity/)))
 			A:energy += energy
 		else if( istype(A,/obj/effect/rust_particle_catcher) )
 			var/obj/effect/rust_particle_catcher/collided_catcher = A
 			if(particle_type && particle_type != "neutron")
 				if(collided_catcher.AddParticles(particle_type, 1 + additional_particles))
 					collided_catcher.parent.AddEnergy(energy,mega_energy)
-					qdel(src)
+					del (src)
 		else if( istype(A,/obj/machinery/power/rust_core) )
 			var/obj/machinery/power/rust_core/collided_core = A
 			if(particle_type && particle_type != "neutron")
@@ -56,7 +56,7 @@
 					var/energy_loss_ratio = abs(collided_core.owned_field.frequency - frequency) / 1e9
 					collided_core.owned_field.mega_energy += mega_energy - mega_energy * energy_loss_ratio
 					collided_core.owned_field.energy += energy - energy * energy_loss_ratio
-					qdel(src)
+					del (src)
 	return
 
 
@@ -67,13 +67,19 @@
 
 
 /obj/effect/accelerated_particle/ex_act(severity)
-	qdel(src)
+	del(src)
 	return
 
 
 
 /obj/effect/accelerated_particle/proc/toxmob(var/mob/living/M)
 	var/radiation = (energy*2)
+/*			if(istype(M,/mob/living/carbon/human))
+		if(M:wear_suit) //TODO: check for radiation protection
+			radiation = round(radiation/2,1)
+	if(istype(M,/mob/living/carbon/monkey))
+		if(M:wear_suit) //TODO: check for radiation protection
+			radiation = round(radiation/2,1)*/
 	M.apply_effect((radiation*3),IRRADIATE,0)
 	M.updatehealth()
 	//M << "\red You feel odd."
@@ -95,7 +101,7 @@
 			src.loc = get_step(src,dir)
 	movement_range--
 	if(movement_range <= 0)
-		qdel(src)
+		del(src)
 	else
 		sleep(lag)
 		move(lag)

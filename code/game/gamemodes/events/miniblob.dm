@@ -1,5 +1,3 @@
-var/blobevent   = 0
-
 /proc/mini_blob_event()
 
 	var/turf/T = pick(blobstart)

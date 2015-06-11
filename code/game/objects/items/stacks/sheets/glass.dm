@@ -10,19 +10,31 @@
 /*
  * Glass sheets
  */
-/obj/item/stack/material/glass
+/obj/item/stack/sheet/glass
 	name = "glass"
+	desc = "HOLY SHEET! That is a lot of glass."
 	singular_name = "glass sheet"
 	icon_state = "sheet-glass"
+	matter = list("glass" = 3750)
+	origin_tech = "materials=1"
 	var/created_window = /obj/structure/window/basic
 	var/is_reinforced = 0
 	var/list/construction_options = list("One Direction", "Full Window")
-	default_type = "glass"
 
-/obj/item/stack/material/glass/attack_self(mob/user as mob)
+/obj/item/stack/sheet/glass/cyborg
+	name = "glass synthesizer"
+	desc = "A device that makes glass."
+	gender = NEUTER
+	singular_name = "glass"
+	matter = null
+	uses_charge = 1
+	charge_costs = list(1000)
+	stacktype = /obj/item/stack/sheet/glass
+
+/obj/item/stack/sheet/glass/attack_self(mob/user as mob)
 	construct_window(user)
 
-/obj/item/stack/material/glass/attackby(obj/item/W, mob/user)
+/obj/item/stack/sheet/glass/attackby(obj/item/W, mob/user)
 	..()
 	if(!is_reinforced)
 		if(istype(W,/obj/item/stack/cable_coil))
@@ -41,10 +53,10 @@
 				user << "<span class='warning'>You need one rod and one sheet of glass to make reinforced glass.</span>"
 				return
 
-			var/obj/item/stack/material/glass/reinforced/RG = new (user.loc)
+			var/obj/item/stack/sheet/glass/reinforced/RG = new (user.loc)
 			RG.add_fingerprint(user)
 			RG.add_to_stacks(user)
-			var/obj/item/stack/material/glass/G = src
+			var/obj/item/stack/sheet/glass/G = src
 			src = null
 			var/replace = (user.get_inactive_hand()==G)
 			V.use(1)
@@ -52,7 +64,7 @@
 			if (!G && replace)
 				user.put_in_hands(RG)
 
-/obj/item/stack/material/glass/proc/construct_window(mob/user as mob)
+/obj/item/stack/sheet/glass/proc/construct_window(mob/user as mob)
 	if(!user || !src)	return 0
 	if(!istype(user.loc,/turf)) return 0
 	if(!user.IsAdvancedToolUser())
@@ -69,11 +81,11 @@
 			for (var/obj/structure/window/win in user.loc)
 				i++
 				if(i >= 4)
-					user << "<span class='warning'>There are too many windows in this location.</span>"
+					user << "\red There are too many windows in this location."
 					return 1
 				directions-=win.dir
 				if(!(win.dir in cardinal))
-					user << "<span class='warning'>Can't let you do that.</span>"
+					user << "\red Can't let you do that."
 					return 1
 
 			//Determine the direction. It will first check in the direction the person making the window is facing, if it finds an already made window it will try looking at the next cardinal direction, etc.
@@ -92,10 +104,10 @@
 			if(!src)	return 1
 			if(src.loc != user)	return 1
 			if(src.get_amount() < 4)
-				user << "<span class='warning'>You need more glass to do that.</span>"
+				user << "\red You need more glass to do that."
 				return 1
 			if(locate(/obj/structure/window) in user.loc)
-				user << "<span class='warning'>There is a window in the way.</span>"
+				user << "\red There is a window in the way."
 				return 1
 			new created_window( user.loc, SOUTHWEST, 1 )
 			src.use(4)
@@ -106,15 +118,15 @@
 			if(!src || src.loc != user) return 1
 
 			if(isturf(user.loc) && locate(/obj/structure/windoor_assembly/, user.loc))
-				user << "<span class='warning'>There is already a windoor assembly in that location.</span>"
+				user << "\red There is already a windoor assembly in that location."
 				return 1
 
 			if(isturf(user.loc) && locate(/obj/machinery/door/window/, user.loc))
-				user << "<span class='warning'>There is already a windoor in that location.</span>"
+				user << "\red There is already a windoor in that location."
 				return 1
 
 			if(src.get_amount() < 5)
-				user << "<span class='warning'>You need more glass to do that.</span>"
+				user << "\red You need more glass to do that."
 				return 1
 
 			new /obj/structure/windoor_assembly(user.loc, user.dir, 1)
@@ -126,34 +138,52 @@
 /*
  * Reinforced glass sheets
  */
-/obj/item/stack/material/glass/reinforced
+/obj/item/stack/sheet/glass/reinforced
 	name = "reinforced glass"
+	desc = "Glass which has been reinforced with metal rods."
 	singular_name = "reinforced glass sheet"
 	icon_state = "sheet-rglass"
-	default_type = "reinforced glass"
+
+	matter = list("metal" = 1875,"glass" = 3750)
+	origin_tech = "materials=2"
+
 	created_window = /obj/structure/window/reinforced
 	is_reinforced = 1
 	construction_options = list("One Direction", "Full Window", "Windoor")
 
+/obj/item/stack/sheet/glass/reinforced/cyborg
+	name = "reinforced glass synthesizer"
+	desc = "A device that makes reinforced glass."
+	gender = NEUTER
+	matter = null
+	uses_charge = 2
+	charge_costs = list(1000)
+	singular_name = "reinforced glass sheet"
+	icon_state = "sheet-rglass"
+	charge_costs = list(500, 1000)
+	stacktype = /obj/item/stack/sheet/glass/reinforced
+
 /*
  * Phoron Glass sheets
  */
-/obj/item/stack/material/glass/phoronglass
+/obj/item/stack/sheet/glass/phoronglass
 	name = "phoron glass"
+	desc = "A very strong and very resistant sheet of a phoron-glass alloy."
 	singular_name = "phoron glass sheet"
 	icon_state = "sheet-phoronglass"
+	matter = list("glass" = 7500)
+	origin_tech = "materials=3;phorontech=2"
 	created_window = /obj/structure/window/phoronbasic
-	default_type = "phoron glass"
 
-/obj/item/stack/material/glass/phoronglass/attackby(obj/item/W, mob/user)
+/obj/item/stack/sheet/glass/phoronglass/attackby(obj/item/W, mob/user)
 	..()
 	if( istype(W, /obj/item/stack/rods) )
 		var/obj/item/stack/rods/V  = W
-		var/obj/item/stack/material/glass/phoronrglass/RG = new (user.loc)
+		var/obj/item/stack/sheet/glass/phoronrglass/RG = new (user.loc)
 		RG.add_fingerprint(user)
 		RG.add_to_stacks(user)
 		V.use(1)
-		var/obj/item/stack/material/glass/G = src
+		var/obj/item/stack/sheet/glass/G = src
 		src = null
 		var/replace = (user.get_inactive_hand()==G)
 		G.use(1)
@@ -165,10 +195,13 @@
 /*
  * Reinforced phoron glass sheets
  */
-/obj/item/stack/material/glass/phoronrglass
+/obj/item/stack/sheet/glass/phoronrglass
 	name = "reinforced phoron glass"
+	desc = "Phoron glass which has been reinforced with metal rods."
 	singular_name = "reinforced phoron glass sheet"
 	icon_state = "sheet-phoronrglass"
-	default_type = "reinforced phoron glass"
+	matter = list("glass" = 7500,"metal" = 1875)
+
+	origin_tech = "materials=4;phorontech=2"
 	created_window = /obj/structure/window/phoronreinforced
 	is_reinforced = 1

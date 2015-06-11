@@ -130,11 +130,9 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 			for(var/obj/machinery/telecomms/T in telecomms_list)
 				add_link(T)
 
-/obj/machinery/telecomms/Destroy()
+
+/obj/machinery/telecomms/Del()
 	telecomms_list -= src
-	for(var/obj/machinery/telecomms/comm in telecomms_list)
-		comm.links -= src
-	links = list()
 	..()
 
 // Used in auto linking
@@ -548,9 +546,9 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 					var/mob/living/carbon/brain/B = M
 					race = "[B.species.name]"
 					log.parameters["intelligible"] = 1
-				else if(M.isMonkey())
+				else if(ismonkey(M))
 					race = "Monkey"
-				else if(M.isSilicon())
+				else if(issilicon(M))
 					race = "Artificial Life"
 					log.parameters["intelligible"] = 1
 				else if(isslime(M))

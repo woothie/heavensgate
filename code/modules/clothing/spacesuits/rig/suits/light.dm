@@ -55,12 +55,11 @@
 	suit_type = "ominous"
 	desc = "A unique, vaccum-proof suit of nano-enhanced armor designed specifically for Spider Clan assassins."
 	icon_state = "ninja_rig"
-	armor = list(melee = 50, bullet = 15, laser = 30, energy = 10, bomb = 25, bio = 100, rad = 30)
+	armor = list(melee = 60, bullet = 50, laser = 30,energy = 15, bomb = 30, bio = 30, rad = 30)
 	emp_protection = 40 //change this to 30 if too high.
 	slowdown = 0
 
 	chest_type = /obj/item/clothing/suit/space/rig/light/ninja
-	glove_type = /obj/item/clothing/gloves/rig/light/ninja
 
 	req_access = list(access_syndicate)
 
@@ -81,10 +80,6 @@
 
 	..()
 
-/obj/item/clothing/gloves/rig/light/ninja
-	name = "insulated gloves"
-	siemens_coefficient = 0
-
 /obj/item/clothing/suit/space/rig/light/ninja
 	breach_threshold = 38 //comparable to regular hardsuits
 
@@ -97,6 +92,7 @@
 	req_access = list(access_syndicate)
 
 	initial_modules = list(
+		/obj/item/rig_module/teleporter,
 		/obj/item/rig_module/stealth_field,
 		/obj/item/rig_module/vision
 		)

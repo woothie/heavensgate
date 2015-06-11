@@ -129,7 +129,7 @@ datum/controller/vote
 			for(var/key in current_votes)
 				if(choices[current_votes[key]] == .)
 					round_voters += key // Keep track of who voted for the winning round.
-			if((mode == "gamemode" && . == "Extended") || ticker.hide_mode == 0) // Announce Extended gamemode, but not other gamemodes
+			if((mode == "gamemode" && . == "extended") || ticker.hide_mode == 0) // Announce Extended gamemode, but not other gamemodes
 				text += "<b>Vote Result: [.]</b>"
 			else
 				if(mode != "gamemode")
@@ -139,8 +139,6 @@ datum/controller/vote
 
 		else
 			text += "<b>Vote Result: Inconclusive - No Votes!</b>"
-			if(mode == "add_antagonist")
-				antag_add_failed = 1
 		log_vote(text)
 		world << "<font color='purple'>[text]</font>"
 		return .
@@ -163,15 +161,10 @@ datum/controller/vote
 				if("crew_transfer")
 					if(. == "Initiate Crew Transfer")
 						init_shift_change(null, 1)
-				if("add_antagonist")
-					if(isnull(.) || . == "None")
-						antag_add_failed = 1
-					else
-						additional_antag_types |= antag_names_to_ids[.]
 
 		if(mode == "gamemode") //fire this even if the vote fails.
-			if(!round_progressing)
-				round_progressing = 1
+			if(!going)
+				going = 1
 				world << "<font color='red'><b>The round will start soon.</b></font>"
 
 		if(restart)
@@ -212,12 +205,14 @@ datum/controller/vote
 					if(ticker.current_state >= 2)
 						return 0
 					choices.Add(config.votable_modes)
+					var/list/L = typesof(/datum/game_mode) - /datum/game_mode
 					for (var/F in choices)
-						var/datum/game_mode/M = gamemode_cache[F]
-						if(!M)
-							continue
-						gamemode_names[M.config_tag] = capitalize(M.name) //It's ugly to put this here but it works
-						additional_text.Add("<td align = 'center'>[M.required_players]</td>")
+						for (var/T in L)
+							var/datum/game_mode/M = new T()
+							if (M.config_tag == F)
+								gamemode_names[M.config_tag] = capitalize(M.name) //It's ugly to put this here but it works
+								additional_text.Add("<td align = 'center'>[M.required_players]</td>")
+								break
 					gamemode_names["secret"] = "Secret"
 				if("crew_transfer")
 					if(check_rights(R_ADMIN|R_MOD, 0))
@@ -232,23 +227,14 @@ datum/controller/vote
 							initiator_key << "The crew transfer button has been disabled!"
 						question = "End the shift?"
 						choices.Add("Initiate Crew Transfer", "Continue The Round")
-				if("add_antagonist")
-					if(!config.allow_extra_antags || ticker.current_state >= 2)
-						return 0
-					for(var/antag_type in all_antag_types)
-						var/datum/antagonist/antag = all_antag_types[antag_type]
-						if(!(antag.id in additional_antag_types) && (antag.flags & ANTAG_VOTABLE))
-							choices.Add(antag.role_text)
-					choices.Add("None")
 				if("custom")
-					question = sanitizeSafe(input(usr,"What is the vote for?") as text|null)
+					question = html_encode(input(usr,"What is the vote for?") as text|null)
 					if(!question)	return 0
 					for(var/i=1,i<=10,i++)
-						var/option = capitalize(sanitize(input(usr,"Please enter an option or hit cancel to finish") as text|null))
+						var/option = capitalize(html_encode(input(usr,"Please enter an option or hit cancel to finish") as text|null))
 						if(!option || mode || !usr.client)	break
 						choices.Add(option)
-				else
-					return 0
+				else			return 0
 			mode = vote_type
 			initiator = initiator_key
 			started_time = world.time
@@ -257,7 +243,7 @@ datum/controller/vote
 				text += "\n[question]"
 
 			log_vote(text)
-			world << "<font color='purple'><b>[text]</b>\nType <b>vote</b> or click <a href='?src=\ref[src]'>here</a> to place your votes.\nYou have [config.vote_period/10] seconds to vote.</font>"
+			world << "<font color='purple'><b>[text]</b>\nType vote to place your votes.\nYou have [config.vote_period/10] seconds to vote.</font>"
 			switch(vote_type)
 				if("crew_transfer")
 					world << sound('sound/ambience/alarm4.ogg', repeat = 0, wait = 0, volume = 50, channel = 3)
@@ -265,8 +251,8 @@ datum/controller/vote
 					world << sound('sound/ambience/alarm4.ogg', repeat = 0, wait = 0, volume = 50, channel = 3)
 				if("custom")
 					world << sound('sound/ambience/alarm4.ogg', repeat = 0, wait = 0, volume = 50, channel = 3)
-			if(mode == "gamemode" && round_progressing)
-				round_progressing = 0
+			if(mode == "gamemode" && going)
+				going = 0
 				world << "<font color='red'><b>Round start has been delayed.</b></font>"
 
 			time_remaining = round(config.vote_period/10)
@@ -334,12 +320,7 @@ datum/controller/vote
 				. += "<font color='grey'>GameMode (Disallowed)</font>"
 			if(trialmin)
 				. += "\t(<a href='?src=\ref[src];vote=toggle_gamemode'>[config.allow_vote_mode?"Allowed":"Disallowed"]</a>)"
-			. += "</li><li>"
-			//extra antagonists
-			if(!antag_add_failed && config.allow_extra_antags)
-				. += "<a href='?src=\ref[src];vote=add_antagonist'>Add Antagonist Type</a>"
-			else
-				. += "<font color='grey'>Restart (Disallowed)</font>"
+
 			. += "</li>"
 			//custom
 			if(trialmin)
@@ -374,9 +355,6 @@ datum/controller/vote
 			if("crew_transfer")
 				if(config.allow_vote_restart || usr.client.holder)
 					initiate_vote("crew_transfer",usr.key)
-			if("add_antagonist")
-				if(config.allow_extra_antags)
-					initiate_vote("add_antagonist",usr.key)
 			if("custom")
 				if(usr.client.holder)
 					initiate_vote("custom",usr.key)

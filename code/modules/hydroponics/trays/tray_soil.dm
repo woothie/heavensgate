@@ -16,7 +16,7 @@
 	..()
 	verbs -= /obj/machinery/portable_atmospherics/hydroponics/verb/close_lid_verb
 	verbs -= /obj/machinery/portable_atmospherics/hydroponics/verb/remove_label
-	verbs -= /obj/machinery/portable_atmospherics/hydroponics/verb/setlight
+	verbs -= /obj/machinery/portable_atmospherics/hydroponics/verb/set_light
 
 /obj/machinery/portable_atmospherics/hydroponics/soil/CanPass()
 	return 1
@@ -41,25 +41,25 @@
 
 /obj/machinery/portable_atmospherics/hydroponics/soil/invisible/remove_dead()
 	..()
-	qdel(src)
+	del(src)
 
 /obj/machinery/portable_atmospherics/hydroponics/soil/invisible/harvest()
 	..()
 	if(!seed) // Repeat harvests are a thing.
-		qdel(src)
+		del(src)
 
 /obj/machinery/portable_atmospherics/hydroponics/soil/invisible/die()
-	qdel(src)
+	del(src)
 
 /obj/machinery/portable_atmospherics/hydroponics/soil/invisible/process()
 	if(!seed)
-		qdel(src)
+		del(src)
 		return
 	else if(name=="plant")
 		name = seed.display_name
 	..()
 
-/obj/machinery/portable_atmospherics/hydroponics/soil/invisible/Destroy()
+/obj/machinery/portable_atmospherics/hydroponics/soil/invisible/Del()
 	// Check if we're masking a decal that needs to be visible again.
 	for(var/obj/effect/plant/plant in get_turf(src))
 		if(plant.invisibility == INVISIBILITY_MAXIMUM)

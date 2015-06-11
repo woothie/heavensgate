@@ -31,7 +31,7 @@
 				if(isturf(input_obj.loc))
 					input_plate = input_obj.loc
 					gib_throw_dir = i
-					qdel(input_obj)
+					del(input_obj)
 					break
 
 		if(!input_plate)
@@ -134,10 +134,10 @@
 		user << "<span class='danger'>Subject may not have abiotic items on.</span>"
 		return
 
-	user.visible_message("<span class='danger'>[user] starts to put [victim] into the gibber!</span>")
+	user.visible_message("\red [user] starts to put [victim] into the gibber!")
 	src.add_fingerprint(user)
 	if(do_after(user, 30) && victim.Adjacent(src) && user.Adjacent(src) && victim.Adjacent(user) && !occupant)
-		user.visible_message("<span class='danger'>[user] stuffs [victim] into the gibber!</span>")
+		user.visible_message("\red [user] stuffs [victim] into the gibber!")
 		if(victim.client)
 			victim.client.perspective = EYE_PERSPECTIVE
 			victim.client.eye = src
@@ -194,9 +194,10 @@
 		if(critter.meat_type)
 			slab_type = critter.meat_type
 	else if(istype(src.occupant,/mob/living/carbon/human))
-		var/mob/living/carbon/human/H = occupant
 		slab_name = src.occupant.real_name
-		slab_type = H.species.meat_type
+		slab_type = /obj/item/weapon/reagent_containers/food/snacks/meat/human
+	else if(istype(src.occupant, /mob/living/carbon/monkey))
+		slab_type = /obj/item/weapon/reagent_containers/food/snacks/meat/monkey
 
 	// Small mobs don't give as much nutrition.
 	if(src.occupant.small)
@@ -209,7 +210,7 @@
 		new_meat.reagents.add_reagent("nutriment",slab_nutrition)
 
 		if(src.occupant.reagents)
-			src.occupant.reagents.trans_to_obj(new_meat, round(occupant.reagents.total_volume/slab_count,1))
+			src.occupant.reagents.trans_to(new_meat, round(occupant.reagents.total_volume/slab_count,1))
 
 	src.occupant.attack_log += "\[[time_stamp()]\] Was gibbed by <b>[user]/[user.ckey]</b>" //One shall not simply gib a mob unnoticed!
 	user.attack_log += "\[[time_stamp()]\] Gibbed <b>[src.occupant]/[src.occupant.ckey]</b>"
@@ -221,15 +222,15 @@
 
 		src.operating = 0
 		src.occupant.gib()
-		qdel(src.occupant)
+		del(src.occupant)
 
 		playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
 		operating = 0
 		for (var/obj/thing in contents)
 			// Todo: unify limbs and internal organs
 			// There's a chance that the gibber will fail to destroy some evidence.
-			if((istype(thing,/obj/item/organ) || istype(thing,/obj/item/organ)) && prob(80))
-				qdel(thing)
+			if((istype(thing,/obj/item/weapon/organ) || istype(thing,/obj/item/organ)) && prob(80))
+				del(thing)
 				continue
 			thing.loc = get_turf(thing) // Drop it onto the turf for throwing.
 			thing.throw_at(get_edge_target_turf(src,gib_throw_dir),rand(0,3),emagged ? 100 : 50) // Being pelted with bits of meat and bone would hurt.

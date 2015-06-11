@@ -13,11 +13,10 @@
 	idle_power_usage = 20
 	active_power_usage = 5000
 	req_access = list(access_robotics)
-	var/current_manufacturer
 	var/time_coeff = 1.5 //can be upgraded with research
 	var/resource_coeff = 1.5 //can be upgraded with research
 	var/list/resources = list(
-										DEFAULT_WALL_MATERIAL=0,
+										"metal"=0,
 										"glass"=0,
 										"gold"=0,
 										"silver"=0,
@@ -94,6 +93,15 @@
 						/obj/item/mecha_parts/part/durand_right_leg,
 						/obj/item/mecha_parts/part/durand_armour
 					),
+	/*"H.O.N.K"=list(
+						/obj/item/mecha_parts/chassis/honker,
+						/obj/item/mecha_parts/part/honker_torso,
+						/obj/item/mecha_parts/part/honker_head,
+						/obj/item/mecha_parts/part/honker_left_arm,
+						/obj/item/mecha_parts/part/honker_right_arm,
+						/obj/item/mecha_parts/part/honker_left_leg,
+						/obj/item/mecha_parts/part/honker_right_leg
+						), No need for HONK stuff*/
 	"Exosuit Equipment"=list(
 						/obj/item/mecha_parts/mecha_equipment/tool/hydraulic_clamp,
 						/obj/item/mecha_parts/mecha_equipment/tool/drill,
@@ -107,7 +115,10 @@
 						/obj/item/mecha_parts/mecha_equipment/generator,
 						///obj/item/mecha_parts/mecha_equipment/jetpack, //TODO MECHA JETPACK SPRITE MISSING
 						/obj/item/mecha_parts/mecha_equipment/weapon/energy/taser,
-						/obj/item/mecha_parts/mecha_equipment/weapon/ballistic/lmg
+						/obj/item/mecha_parts/mecha_equipment/weapon/ballistic/lmg,
+						///obj/item/mecha_parts/mecha_equipment/weapon/ballistic/missile_rack/banana_mortar/mousetrap_mortar, HONK-related mech part
+						///obj/item/mecha_parts/mecha_equipment/weapon/ballistic/missile_rack/banana_mortar, Also HONK-related
+						///obj/item/mecha_parts/mecha_equipment/weapon/honker Thirdly HONK-related
 						),
 
 	"Robotic Upgrade Modules" = list(
@@ -119,12 +130,19 @@
 						/obj/item/borg/upgrade/jetpack
 						),
 
+
+
+
+
+
 	"Misc"=list(/obj/item/mecha_parts/mecha_tracking)
 	)
 
+
+
+
 /obj/machinery/mecha_part_fabricator/New()
 	..()
-
 	component_parts = list()
 	component_parts += new /obj/item/weapon/circuitboard/mechfab(src)
 	component_parts += new /obj/item/weapon/stock_parts/matter_bin(src)
@@ -146,9 +164,6 @@
 			break
 	*/
 	return
-
-/obj/machinery/mecha_part_fabricator/initialize()
-	current_manufacturer = basic_robolimb.company
 
 /obj/machinery/mecha_part_fabricator/RefreshParts()
 	var/T = 0
@@ -173,9 +188,9 @@
 	if(time_coeff!=diff)
 		time_coeff = diff
 
-/obj/machinery/mecha_part_fabricator/Destroy()
+/obj/machinery/mecha_part_fabricator/Del()
 	for(var/atom/A in src)
-		qdel(A)
+		del A
 	..()
 	return
 
@@ -248,7 +263,7 @@
 	if(!istype(apart)) return 0
 	for(var/obj/O in part_set)
 		if(O.type == apart.type)
-			qdel(apart)
+			del apart
 			return 0
 	part_set[++part_set.len] = apart
 	return 1
@@ -273,6 +288,14 @@
 				world << "Duplicate part set definition for [src](\ref[src])"
 				return 0
 		return 1
+*/
+/*
+	New()
+		..()
+		src.add_part_to_set("Test",list("result"="/obj/item/mecha_parts/part/gygax_armour","time"=600,"metal"=75000,"diamond"=10000))
+		src.add_part_to_set("Test",list("result"="/obj/item/mecha_parts/part/ripley_left_arm","time"=200,"metal"=25000))
+		src.remove_part_set("Gygax")
+		return
 */
 
 /obj/machinery/mecha_part_fabricator/proc/output_parts_list(set_name)
@@ -338,11 +361,7 @@
 	if( !(locate(part, src.contents)) || !(part.vars.Find("construction_time")) || !(part.vars.Find("construction_cost")) ) // these 3 are the current requirements for an object being buildable by the mech_fabricator
 		return
 
-	if(current_manufacturer)
-		src.being_built = new part.type(src, current_manufacturer)
-	else
-		src.being_built = new part.type(src, basic_robolimb.company)
-
+	src.being_built = new part.type(src)
 	src.desc = "It's building [src.being_built]."
 	src.remove_resources(part)
 	src.overlays += "fab-active"
@@ -543,7 +562,7 @@
 		switch(screen)
 			if("main")
 				left_part = output_available_resources()+"<hr>"
-				left_part += "<a href='?src=\ref[src];sync=1'>Sync with R&D servers</a> | <a href='?src=\ref[src];set_manufacturer=1'>Set manufacturer</a> ([current_manufacturer])<hr>"
+				left_part += "<a href='?src=\ref[src];sync=1'>Sync with R&D servers</a><hr>"
 				for(var/part_set in part_sets)
 					left_part += "<a href='?src=\ref[src];part_set=[part_set]'>[part_set]</a> - \[<a href='?src=\ref[src];partset_to_queue=[part_set]'>Add all parts to queue\]<br>"
 			if("parts")
@@ -604,9 +623,6 @@
 		return
 
 	var/datum/topic_input/filter = new /datum/topic_input(href,href_list)
-	if(href_list["set_manufacturer"])
-		var/choice = input(usr, "Which manufacturer do you wish to use for this fabricator?") as null|anything in all_robolimbs
-		if(choice) current_manufacturer = choice
 	if(href_list["part_set"])
 		var/tpart_set = filter.getStr("part_set")
 		if(tpart_set)
@@ -691,24 +707,24 @@
 /obj/machinery/mecha_part_fabricator/proc/remove_material(var/mat_string, var/amount)
 	var/type
 	switch(mat_string)
-		if(DEFAULT_WALL_MATERIAL)
-			type = /obj/item/stack/material/steel
+		if("metal")
+			type = /obj/item/stack/sheet/metal
 		if("glass")
-			type = /obj/item/stack/material/glass
+			type = /obj/item/stack/sheet/glass
 		if("gold")
-			type = /obj/item/stack/material/gold
+			type = /obj/item/stack/sheet/mineral/gold
 		if("silver")
-			type = /obj/item/stack/material/silver
+			type = /obj/item/stack/sheet/mineral/silver
 		if("diamond")
-			type = /obj/item/stack/material/diamond
+			type = /obj/item/stack/sheet/mineral/diamond
 		if("phoron")
-			type = /obj/item/stack/material/phoron
+			type = /obj/item/stack/sheet/mineral/phoron
 		if("uranium")
-			type = /obj/item/stack/material/uranium
+			type = /obj/item/stack/sheet/mineral/uranium
 		else
 			return 0
 	var/result = 0
-	var/obj/item/stack/material/res = new type(src)
+	var/obj/item/stack/sheet/res = new type(src)
 
 	// amount available to take out
 	var/total_amount = round(resources[mat_string]/res.perunit)
@@ -721,7 +737,7 @@
 		res.Move(src.loc)
 		result = res.amount
 	else
-		qdel(res)
+		del res
 	return result
 
 
@@ -743,32 +759,34 @@
 			M.state = 2
 			M.icon_state = "box_1"
 			for(var/obj/I in component_parts)
+				if(I.reliability != 100 && crit_fail)
+					I.crit_fail = 1
 				I.loc = src.loc
-			if(src.resources[DEFAULT_WALL_MATERIAL] >= 3750)
-				var/obj/item/stack/material/steel/G = new /obj/item/stack/material/steel(src.loc)
-				G.amount = round(src.resources[DEFAULT_WALL_MATERIAL] / G.perunit)
+			if(src.resources["metal"] >= 3750)
+				var/obj/item/stack/sheet/metal/G = new /obj/item/stack/sheet/metal(src.loc)
+				G.amount = round(src.resources["metal"] / G.perunit)
 			if(src.resources["glass"] >= 3750)
-				var/obj/item/stack/material/glass/G = new /obj/item/stack/material/glass(src.loc)
+				var/obj/item/stack/sheet/glass/G = new /obj/item/stack/sheet/glass(src.loc)
 				G.amount = round(src.resources["glass"] / G.perunit)
 			if(src.resources["phoron"] >= 2000)
-				var/obj/item/stack/material/phoron/G = new /obj/item/stack/material/phoron(src.loc)
+				var/obj/item/stack/sheet/mineral/phoron/G = new /obj/item/stack/sheet/mineral/phoron(src.loc)
 				G.amount = round(src.resources["phoron"] / G.perunit)
 			if(src.resources["silver"] >= 2000)
-				var/obj/item/stack/material/silver/G = new /obj/item/stack/material/silver(src.loc)
+				var/obj/item/stack/sheet/mineral/silver/G = new /obj/item/stack/sheet/mineral/silver(src.loc)
 				G.amount = round(src.resources["silver"] / G.perunit)
 			if(src.resources["gold"] >= 2000)
-				var/obj/item/stack/material/gold/G = new /obj/item/stack/material/gold(src.loc)
+				var/obj/item/stack/sheet/mineral/gold/G = new /obj/item/stack/sheet/mineral/gold(src.loc)
 				G.amount = round(src.resources["gold"] / G.perunit)
 			if(src.resources["uranium"] >= 2000)
-				var/obj/item/stack/material/uranium/G = new /obj/item/stack/material/uranium(src.loc)
+				var/obj/item/stack/sheet/mineral/uranium/G = new /obj/item/stack/sheet/mineral/uranium(src.loc)
 				G.amount = round(src.resources["uranium"] / G.perunit)
 			if(src.resources["diamond"] >= 2000)
-				var/obj/item/stack/material/diamond/G = new /obj/item/stack/material/diamond(src.loc)
+				var/obj/item/stack/sheet/mineral/diamond/G = new /obj/item/stack/sheet/mineral/diamond(src.loc)
 				G.amount = round(src.resources["diamond"] / G.perunit)
-			qdel(src)
+			del(src)
 			return 1
 		else
-			user << "<span class='warning'>You can't load the [src.name] while it's opened.</span>"
+			user << "\red You can't load the [src.name] while it's opened."
 			return 1
 
 	if(istype(W, /obj/item/weapon/card/emag))
@@ -777,19 +795,19 @@
 
 	var/material
 	switch(W.type)
-		if(/obj/item/stack/material/gold)
+		if(/obj/item/stack/sheet/mineral/gold)
 			material = "gold"
-		if(/obj/item/stack/material/silver)
+		if(/obj/item/stack/sheet/mineral/silver)
 			material = "silver"
-		if(/obj/item/stack/material/diamond)
+		if(/obj/item/stack/sheet/mineral/diamond)
 			material = "diamond"
-		if(/obj/item/stack/material/phoron)
+		if(/obj/item/stack/sheet/mineral/phoron)
 			material = "phoron"
-		if(/obj/item/stack/material/steel)
-			material = DEFAULT_WALL_MATERIAL
-		if(/obj/item/stack/material/glass)
+		if(/obj/item/stack/sheet/metal)
+			material = "metal"
+		if(/obj/item/stack/sheet/glass)
 			material = "glass"
-		if(/obj/item/stack/material/uranium)
+		if(/obj/item/stack/sheet/mineral/uranium)
 			material = "uranium"
 		else
 			return ..()
@@ -798,7 +816,7 @@
 		user << "The fabricator is currently processing. Please wait until completion."
 		return
 
-	var/obj/item/stack/material/stack = W
+	var/obj/item/stack/sheet/stack = W
 
 	var/sname = "[stack.name]"
 	var/amnt = stack.perunit

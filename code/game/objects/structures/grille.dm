@@ -8,22 +8,20 @@
 	flags = CONDUCT
 	pressure_resistance = 5*ONE_ATMOSPHERE
 	layer = 2.9
-	explosion_resistance = 1
+	explosion_resistance = 5
 	var/health = 10
 	var/destroyed = 0
 
 
 /obj/structure/grille/ex_act(severity)
-	qdel(src)
+	del(src)
 
 /obj/structure/grille/blob_act()
-	qdel(src)
+	del(src)
 
-/obj/structure/grille/update_icon()
-	if(destroyed)
-		icon_state = "[initial(icon_state)]-b"
-	else
-		icon_state = initial(icon_state)
+/obj/structure/grille/meteorhit(var/obj/M)
+	del(src)
+
 
 /obj/structure/grille/Bumped(atom/user)
 	if(ismob(user)) shock(user, 70)
@@ -31,7 +29,6 @@
 /obj/structure/grille/attack_hand(mob/user as mob)
 
 	playsound(loc, 'sound/effects/grillehit.ogg', 80, 1)
-	user.do_attack_animation(src)
 
 	var/damage_dealt = 1
 	var/attack_message = "kicks"
@@ -101,8 +98,8 @@
 	if(iswirecutter(W))
 		if(!shock(user, 100))
 			playsound(loc, 'sound/items/Wirecutter.ogg', 100, 1)
-			PoolOrNew(/obj/item/stack/rods, list(get_turf(src), destroyed ? 1 : 2))
-			qdel(src)
+			new /obj/item/stack/rods(loc, 2)
+			del(src)
 	else if((isscrewdriver(W)) && (istype(loc, /turf/simulated) || anchored))
 		if(!shock(user, 90))
 			playsound(loc, 'sound/items/Screwdriver.ogg', 100, 1)
@@ -112,8 +109,8 @@
 			return
 
 //window placing begin
-	else if(istype(W,/obj/item/stack/material/glass))
-		var/obj/item/stack/material/glass/ST = W
+	else if(istype(W,/obj/item/stack/sheet/glass))
+		var/obj/item/stack/sheet/glass/ST = W
 		var/dir_to_set = 1
 		if(loc == user.loc)
 			dir_to_set = user.dir
@@ -151,10 +148,9 @@
 		return
 //window placing end
 
-	else if(istype(W, /obj/item/weapon/material/shard))
+	else if(istype(W, /obj/item/weapon/shard))
 		health -= W.force * 0.1
 	else if(!shock(user, 70))
-		user.do_attack_animation(src)
 		playsound(loc, 'sound/effects/grillehit.ogg', 80, 1)
 		switch(W.damtype)
 			if("fire")
@@ -169,15 +165,15 @@
 /obj/structure/grille/proc/healthcheck()
 	if(health <= 0)
 		if(!destroyed)
+			icon_state = "brokengrille"
 			density = 0
 			destroyed = 1
-			update_icon()
-			PoolOrNew(/obj/item/stack/rods, get_turf(src))
+			new /obj/item/stack/rods(loc)
 
 		else
 			if(health <= -6)
-				PoolOrNew(/obj/item/stack/rods, get_turf(src))
-				qdel(src)
+				new /obj/item/stack/rods(loc)
+				del(src)
 				return
 	return
 
@@ -216,28 +212,6 @@
 
 /obj/structure/grille/attack_generic(var/mob/user, var/damage, var/attack_verb)
 	visible_message("<span class='danger'>[user] [attack_verb] the [src]!</span>")
-	user.do_attack_animation(src)
 	health -= damage
 	spawn(1) healthcheck()
 	return 1
-
-// Used in mapping to avoid
-/obj/structure/grille/broken
-	destroyed = 1
-	icon_state = "grille-b"
-	density = 0
-	New()
-		..()
-		health = rand(-5, -1) //In the destroyed but not utterly threshold.
-		healthcheck() //Send this to healthcheck just in case we want to do something else with it.
-
-/obj/structure/grille/cult
-	name = "cult grille"
-	desc = "A matrice built out of an unknown material, with some sort of force field blocking air around it"
-	icon_state = "grillecult"
-	health = 40 //Make it strong enough to avoid people breaking in too easily
-
-/obj/structure/grille/cult/CanPass(atom/movable/mover, turf/target, height = 1.5, air_group = 0)
-	if(air_group)
-		return 0 //Make sure air doesn't drain
-	..()

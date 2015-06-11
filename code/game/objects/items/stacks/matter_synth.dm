@@ -28,9 +28,6 @@
 /datum/matter_synth/medicine
 	name = "Medicine Synthesizer"
 
-/datum/matter_synth/nanite
-	name = "Nanite Synthesizer"
-
 /datum/matter_synth/metal
 	name = "Metal Synthesizer"
 

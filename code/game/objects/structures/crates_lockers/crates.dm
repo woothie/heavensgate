@@ -105,18 +105,18 @@
 	switch(severity)
 		if(1.0)
 			for(var/obj/O in src.contents)
-				qdel(O)
-			qdel(src)
+				del(O)
+			del(src)
 			return
 		if(2.0)
 			for(var/obj/O in src.contents)
 				if(prob(50))
-					qdel(O)
-			qdel(src)
+					del(O)
+			del(src)
 			return
 		if(3.0)
 			if (prob(50))
-				qdel(src)
+				del(src)
 			return
 		else
 	return
@@ -222,7 +222,7 @@
 			open()
 		else
 			src.req_access = list()
-			src.req_access += pick(get_all_station_access())
+			src.req_access += pick(get_all_accesses())
 	..()
 
 /obj/structure/closet/crate/plastic
@@ -486,7 +486,7 @@
 		..()
 		new /obj/item/weapon/reagent_containers/spray/plantbgone(src)
 		new /obj/item/weapon/reagent_containers/spray/plantbgone(src)
-		new /obj/item/weapon/material/minihoe(src)
+		new /obj/item/weapon/minihoe(src)
 //		new /obj/item/weapon/weedspray(src)
 //		new /obj/item/weapon/weedspray(src)
 //		new /obj/item/weapon/pestspray(src)

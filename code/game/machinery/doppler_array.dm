@@ -9,7 +9,7 @@ var/list/doppler_arrays = list()
 	..()
 	doppler_arrays += src
 
-/obj/machinery/doppler_array/Destroy()
+/obj/machinery/doppler_array/Del()
 	doppler_arrays -= src
 	..()
 

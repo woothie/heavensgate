@@ -36,21 +36,21 @@
 			for(var/atom/movable/A as mob|obj in src)
 				A.loc = src.loc
 				ex_act(severity)
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if (prob(50))
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = src.loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 		if(3.0)
 			if (prob(5))
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = src.loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 	return
 
@@ -64,7 +64,7 @@
 				A.loc = src
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		//src.connected = null
-		qdel(src.connected)
+		del(src.connected)
 	else
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		src.connected = new /obj/structure/m_tray( src.loc )
@@ -80,7 +80,7 @@
 			src.connected.set_dir(src.dir)
 		else
 			//src.connected = null
-			qdel(src.connected)
+			del(src.connected)
 	src.add_fingerprint(user)
 	update()
 	return
@@ -92,7 +92,7 @@
 			return
 		if ((!in_range(src, usr) && src.loc != user))
 			return
-		t = sanitizeSafe(t, MAX_NAME_LEN)
+		t = sanitize(copytext(t,1,MAX_MESSAGE_LEN))
 		if (t)
 			src.name = text("Morgue- '[]'", t)
 		else
@@ -116,7 +116,7 @@
 		src.connected.icon_state = "morguet"
 	else
 		//src.connected = null
-		qdel(src.connected)
+		del(src.connected)
 	return
 
 
@@ -144,7 +144,7 @@
 		src.connected.update()
 		add_fingerprint(user)
 		//SN src = null
-		qdel(src)
+		del(src)
 		return
 	return
 
@@ -159,7 +159,7 @@
 	if (user != O)
 		for(var/mob/B in viewers(user, 3))
 			if ((B.client && !( B.blinded )))
-				B << "<span class='warning'>\The [user] stuffs [O] into [src]!"
+				B << text("\red [] stuffs [] into []!", user, O, src)
 	return
 
 
@@ -195,21 +195,21 @@
 			for(var/atom/movable/A as mob|obj in src)
 				A.loc = src.loc
 				ex_act(severity)
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if (prob(50))
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = src.loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 		if(3.0)
 			if (prob(5))
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = src.loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 	return
 
@@ -218,13 +218,13 @@
 
 /obj/structure/crematorium/attack_hand(mob/user as mob)
 //	if (cremating) AWW MAN! THIS WOULD BE SO MUCH MORE FUN ... TO WATCH
-//		user.show_message("<span class='warning'>Uh-oh, that was a bad idea.</span>", 1)
+//		user.show_message("\red Uh-oh, that was a bad idea.", 1)
 //		//usr << "Uh-oh, that was a bad idea."
 //		src:loc:poison += 20000000
 //		src:loc:firelevel = src:loc:poison
 //		return
 	if (cremating)
-		usr << "<span class='warning'>It's locked.</span>"
+		usr << "\red It's locked."
 		return
 	if ((src.connected) && (src.locked == 0))
 		for(var/atom/movable/A as mob|obj in src.connected.loc)
@@ -232,7 +232,7 @@
 				A.loc = src
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		//src.connected = null
-		qdel(src.connected)
+		del(src.connected)
 	else if (src.locked == 0)
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
 		src.connected = new /obj/structure/c_tray( src.loc )
@@ -247,7 +247,7 @@
 			src.connected.icon_state = "cremat"
 		else
 			//src.connected = null
-			qdel(src.connected)
+			del(src.connected)
 	src.add_fingerprint(user)
 	update()
 
@@ -258,7 +258,7 @@
 			return
 		if ((!in_range(src, usr) > 1 && src.loc != user))
 			return
-		t = sanitizeSafe(t, MAX_NAME_LEN)
+		t = sanitize(copytext(t,1,MAX_MESSAGE_LEN))
 		if (t)
 			src.name = text("Crematorium- '[]'", t)
 		else
@@ -282,7 +282,7 @@
 		src.connected.icon_state = "cremat"
 	else
 		//src.connected = null
-		qdel(src.connected)
+		del(src.connected)
 	return
 
 /obj/structure/crematorium/proc/cremate(atom/A, mob/user as mob)
@@ -294,7 +294,7 @@
 
 	if(contents.len <= 0)
 		for (var/mob/M in viewers(src))
-			M.show_message("<span class='warning'>You hear a hollow crackle.</span>", 1)
+			M.show_message("\red You hear a hollow crackle.", 1)
 			return
 
 	else
@@ -303,7 +303,7 @@
 			return
 
 		for (var/mob/M in viewers(src))
-			M.show_message("<span class='warning'>You hear a roar as the crematorium activates.</span>", 1)
+			M.show_message("\red You hear a roar as the crematorium activates.", 1)
 
 		cremating = 1
 		locked = 1
@@ -323,10 +323,10 @@
 			//log_attack("\[[time_stamp()]\] <b>[user]/[user.ckey]</b> cremated <b>[M]/[M.ckey]</b>")
 			M.death(1)
 			M.ghostize()
-			qdel(M)
+			del(M)
 
 		for(var/obj/O in contents) //obj instead of obj/item so that bodybags and ashes get destroyed. We dont want tons and tons of ash piling up
-			qdel(O)
+			del(O)
 
 		new /obj/effect/decal/cleanable/ash(src)
 		sleep(30)
@@ -360,7 +360,7 @@
 		src.connected.update()
 		add_fingerprint(user)
 		//SN src = null
-		qdel(src)
+		del(src)
 		return
 	return
 
@@ -375,7 +375,7 @@
 	if (user != O)
 		for(var/mob/B in viewers(user, 3))
 			if ((B.client && !( B.blinded )))
-				B << text("<span class='warning'>[] stuffs [] into []!</span>", user, O, src)
+				B << text("\red [] stuffs [] into []!", user, O, src)
 			//Foreach goto(99)
 	return
 

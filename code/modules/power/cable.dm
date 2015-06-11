@@ -85,7 +85,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	cable_list += src //add it to the global cable list
 
 
-/obj/structure/cable/Destroy()					// called when a cable is deleted
+/obj/structure/cable/Del()					// called when a cable is deleted
 	if(powernet)
 		cut_cable_from_powernet()				// update the powernets
 	cable_list -= src							//remove it from global cable list
@@ -154,11 +154,11 @@ By design, d1 is the smallest direction and d2 is the highest
 					var/turf/below = locate(src.x, src.y, controller.down_target)
 					for(var/obj/structure/cable/c in below)
 						if(c.d1 == 12 || c.d2 == 12)
-							qdel(c)
+							c.Del()
 ///// Z-Level Stuff
 		investigate_log("was cut by [key_name(usr, usr.client)] in [user.loc.loc]","wires")
 
-		qdel(src)
+		del(src) // qdel
 		return
 
 
@@ -201,16 +201,16 @@ By design, d1 is the smallest direction and d2 is the highest
 /obj/structure/cable/ex_act(severity)
 	switch(severity)
 		if(1.0)
-			qdel(src)
+			del(src) // qdel
 		if(2.0)
 			if (prob(50))
 				new/obj/item/stack/cable_coil(src.loc, src.d1 ? 2 : 1, color)
-				qdel(src)
+				del(src) // qdel
 
 		if(3.0)
 			if (prob(25))
 				new/obj/item/stack/cable_coil(src.loc, src.d1 ? 2 : 1, color)
-				qdel(src)
+				del(src) // qdel
 	return
 
 obj/structure/cable/proc/cableColor(var/colorC)
@@ -418,7 +418,7 @@ obj/structure/cable/proc/cableColor(var/colorC)
 		propagate_network(powerlist[1],PN) //propagates the new powernet beginning at the source cable
 
 		if(PN.is_empty()) //can happen with machines made nodeless when smoothing cables
-			qdel(PN)
+			del(PN) // qdel
 
 // cut the cable's powernet at this cable and updates the powergrid
 /obj/structure/cable/proc/cut_cable_from_powernet()
@@ -470,12 +470,13 @@ obj/structure/cable/proc/cableColor(var/colorC)
 	amount = MAXCOIL
 	max_amount = MAXCOIL
 	color = COLOR_RED
+	//item_color = COLOR_RED Use regular "color" var instead. No need to have it duplicate in two vars. Causes confusion.
 	desc = "A coil of power cable."
 	throwforce = 10
 	w_class = 2.0
 	throw_speed = 2
 	throw_range = 5
-	matter = list(DEFAULT_WALL_MATERIAL = 50, "glass" = 20)
+	matter = list("metal" = 50, "glass" = 20)
 	flags = CONDUCT
 	slot_flags = SLOT_BELT
 	item_state = "coil"
@@ -512,25 +513,24 @@ obj/structure/cable/proc/cableColor(var/colorC)
 ///////////////////////////////////
 
 //you can use wires to heal robotics
-/obj/item/stack/cable_coil/afterattack(var/mob/M, var/mob/user)
-
-	if(ishuman(M))
+/obj/item/stack/cable_coil/attack(mob/M as mob, mob/user as mob)
+	if(istype(M,/mob/living/carbon/human))
 		var/mob/living/carbon/human/H = M
-		var/obj/item/organ/external/S = H.organs_by_name[user.zone_sel.selecting]
-
-		if (!S) return
-		if(!(S.status & ORGAN_ROBOT) || user.a_intent != I_HELP)
+		var/datum/organ/external/S = H.get_organ(user.zone_sel.selecting)
+		if(!(S.status & ORGAN_ROBOT) || user.a_intent != "help")
 			return ..()
 
-		if(S.burn_dam)
-			if(S.burn_dam < ROBOLIMB_SELF_REPAIR_CAP)
-				S.heal_damage(0,15,0,1)
-				user.visible_message("<span class='danger'>\The [user] repairs some burn damage on \the [M]'s [S.name] with \the [src].</span>")
-			else if(S.open != 2)
-				user << "<span class='danger'>The damage is far too severe to patch over externally.</span>"
-			return 1
-		else if(S.open != 2)
-			user << "<span class='notice'>Nothing to fix!</span>"
+		if(H.species.flags & IS_SYNTHETIC)
+			if(M == user)
+				user << "\red You can't repair damage to your own body - it's against OH&S."
+				return
+
+		if(S.burn_dam > 0 && use(1))
+			S.heal_damage(0,15,0,1)
+			user.visible_message("\red \The [user] repairs some burn damage on \the [M]'s [S.display_name] with \the [src].")
+			return
+		else
+			user << "Nothing to fix!"
 
 	else
 		return ..()
@@ -781,7 +781,7 @@ obj/structure/cable/proc/cableColor(var/colorC)
 			if (C.shock(user, 50))
 				if (prob(50)) //fail
 					new/obj/item/stack/cable_coil(C.loc, 1, C.color)
-					qdel(C)
+					del(C) // qdel
 
 // called when cable_coil is click on an installed obj/cable
 // or click on a turf that already contains a "node" cable
@@ -845,7 +845,7 @@ obj/structure/cable/proc/cableColor(var/colorC)
 			if (NC.shock(user, 50))
 				if (prob(50)) //fail
 					new/obj/item/stack/cable_coil(NC.loc, 1, NC.color)
-					qdel(NC)
+					del(NC) // qdel
 
 			return
 
@@ -893,7 +893,7 @@ obj/structure/cable/proc/cableColor(var/colorC)
 		if (C.shock(user, 50))
 			if (prob(50)) //fail
 				new/obj/item/stack/cable_coil(C.loc, 2, C.color)
-				qdel(C)
+				del(C) // qdel
 				return
 
 		C.denode()// this call may have disconnected some cables that terminated on the centre of the turf, if so split the powernets.

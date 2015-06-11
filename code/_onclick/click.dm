@@ -45,9 +45,6 @@
 		return
 
 	var/list/modifiers = params2list(params)
-	if(modifiers["shift"] && modifiers["ctrl"])
-		CtrlShiftClickOn(A)
-		return
 	if(modifiers["middle"])
 		MiddleClickOn(A)
 		return
@@ -195,7 +192,7 @@
 */
 /mob/proc/RangedAttack(var/atom/A, var/params)
 	if(!mutations.len) return
-	if((LASER in mutations) && a_intent == I_HURT)
+	if((LASER in mutations) && a_intent == "harm")
 		LaserEyes(A) // moved into a proc below
 	else if(TK in mutations)
 		switch(get_dist(src,A))
@@ -229,6 +226,17 @@
 /mob/living/carbon/MiddleClickOn(var/atom/A)
 	swap_hand()
 
+/mob/living/carbon/human/MiddleClickOn(var/atom/A)
+
+	if(back)
+		var/obj/item/weapon/rig/rig = back
+		if(istype(rig) && rig.selected_module)
+			if(world.time <= next_move) return
+			next_move = world.time + 8
+			rig.selected_module.engage(A)
+			return
+
+	swap_hand()
 
 // In case of use break glass
 /*
@@ -285,17 +293,6 @@
 	return T.AdjacentQuick(src)
 
 /*
-	Control+Shift click
-	Unused except for AI
-*/
-/mob/proc/CtrlShiftClickOn(var/atom/A)
-	A.CtrlShiftClick(src)
-	return
-
-/atom/proc/CtrlShiftClick(var/mob/user)
-	return
-
-/*
 	Misc helpers
 
 	Laser Eyes: as the name implies, handles this since nothing else does currently
@@ -329,7 +326,7 @@
 		nutrition = max(nutrition - rand(1,5),0)
 		handle_regular_hud_updates()
 	else
-		src << "<span class='warning'>You're out of energy!  You need food!</span>"
+		src << "\red You're out of energy!  You need food!"
 
 // Simple helper to face what you clicked on, in case it should be needed in more than one place
 /mob/proc/face_atom(var/atom/A)

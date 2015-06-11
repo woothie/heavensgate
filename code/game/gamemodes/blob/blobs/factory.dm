@@ -12,7 +12,7 @@
 	update_icon()
 		if(health <= 0)
 			playsound(src.loc, 'sound/effects/splat.ogg', 50, 1)
-			qdel(src)
+			del(src)
 			return
 		return
 
@@ -22,11 +22,6 @@
 		new/mob/living/simple_animal/hostile/blobspore(src.loc, src)
 		return 1
 
-/obj/effect/blob/factory/Destroy()
-	for(var/mob/living/simple_animal/hostile/blobspore/spore in spores)
-		if(spore.factory == src)
-			spore.factory = null
-	..()
 
 /mob/living/simple_animal/hostile/blobspore
 	name = "blob"
@@ -63,10 +58,9 @@
 		..(loc)
 		return
 	death()
-		qdel(src)
+		..()
+		if(factory)
+			factory.spores -= src
+		..()
+		del(src)
 
-/mob/living/simple_animal/hostile/blobspore/Destroy()
-	if(factory)
-		factory.spores -= src
-		factory = null
-	..()

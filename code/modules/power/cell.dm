@@ -6,9 +6,8 @@
 	..()
 	charge = maxcharge
 
-/obj/item/weapon/cell/initialize()
-	..()
-	update_icon()
+	spawn(5)
+		updateicon()
 
 /obj/item/weapon/cell/drain_power(var/drain_check, var/surge, var/power = 0)
 
@@ -22,7 +21,7 @@
 
 	return use(cell_amt) / CELLRATE
 
-/obj/item/weapon/cell/update_icon()
+/obj/item/weapon/cell/proc/updateicon()
 	overlays.Cut()
 
 	if(charge < 0.01)
@@ -67,6 +66,12 @@
 
 	if(maxcharge < amount)	return 0
 	var/amount_used = min(maxcharge-charge,amount)
+	if(crit_fail)	return 0
+	if(!prob(reliability))
+		minor_fault++
+		if(prob(minor_fault))
+			crit_fail = 1
+			return 0
 	charge += amount_used
 	return amount_used
 
@@ -79,6 +84,8 @@
 		user << "[desc]\nThe manufacturer's label states this cell has a power rating of [maxcharge], and that you should not swallow it.\nThe charge meter reads [round(src.percent() )]%."
 	else
 		user << "This power cell has an exciting chrome finish, as it is an uber-capacity cell type! It has a power rating of [maxcharge]!\nThe charge meter reads [round(src.percent() )]%."
+	if(crit_fail)
+		user << "\red This power cell seems to be faulty."
 
 /obj/item/weapon/cell/attackby(obj/item/W, mob/user)
 	..()
@@ -122,7 +129,8 @@
 
 	explosion(T, devastation_range, heavy_impact_range, light_impact_range, flash_range)
 
-	qdel(src)
+	spawn(1)
+		del(src)
 
 /obj/item/weapon/cell/proc/corrupt()
 	charge /= 2
@@ -139,23 +147,25 @@
 	charge -= maxcharge / severity
 	if (charge < 0)
 		charge = 0
+	if(reliability != 100 && prob(50/severity))
+		reliability -= 10 / severity
 	..()
 
 /obj/item/weapon/cell/ex_act(severity)
 
 	switch(severity)
 		if(1.0)
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if (prob(50))
-				qdel(src)
+				del(src)
 				return
 			if (prob(50))
 				corrupt()
 		if(3.0)
 			if (prob(25))
-				qdel(src)
+				del(src)
 				return
 			if (prob(25))
 				corrupt()

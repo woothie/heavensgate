@@ -32,7 +32,7 @@
 				if(80 to 90)	filling.icon_state = "reagent80"
 				if(91 to INFINITY)	filling.icon_state = "reagent100"
 
-			filling.icon += reagents.get_color()
+			filling.icon += mix_color_from_reagents(reagents.reagent_list)
 			overlays += filling
 
 /obj/machinery/iv_drip/MouseDrop(over_object, src_location, over_location)
@@ -82,11 +82,11 @@
 		// Give blood
 		if(mode)
 			if(src.beaker.volume > 0)
-				var/transfer_amount = REM
+				var/transfer_amount = REAGENTS_METABOLISM
 				if(istype(src.beaker, /obj/item/weapon/reagent_containers/blood))
 					// speed up transfer on blood packs
 					transfer_amount = 4
-				src.beaker.reagents.trans_to_mob(src.attached, transfer_amount, CHEM_BLOOD)
+				src.beaker.reagents.trans_to(src.attached, transfer_amount)
 				update_icon()
 
 		// Take blood
@@ -106,7 +106,7 @@
 			if(NOCLONE in T.mutations)
 				return
 
-			if(T.species.flags & NO_BLOOD)
+			if(T.species && T.species.flags & NO_BLOOD)
 				return
 
 			// If the human is losing too much blood, beep.
@@ -137,7 +137,7 @@
 	set src in view(1)
 
 	if(!istype(usr, /mob/living))
-		usr << "<span class='warning'>You can't do that.</span>"
+		usr << "\red You can't do that."
 		return
 
 	if(usr.stat)
@@ -154,15 +154,10 @@
 
 	if(beaker)
 		if(beaker.reagents && beaker.reagents.reagent_list.len)
-			usr << "<span class='notice'>Attached is \a [beaker] with [beaker.reagents.total_volume] units of liquid.</span>"
+			usr << "\blue Attached is \a [beaker] with [beaker.reagents.total_volume] units of liquid."
 		else
-			usr << "<span class='notice'>Attached is an empty [beaker].</span>"
+			usr << "\blue Attached is an empty [beaker]."
 	else
-		usr << "<span class='notice'>No chemicals are attached.</span>"
+		usr << "\blue No chemicals are attached."
 
-	usr << "<span class='notice'>[attached ? attached : "No one"] is attached.</span>"
-
-/obj/machinery/iv_drip/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	if(height && istype(mover) && mover.checkpass(PASSTABLE)) //allow bullets, beams, thrown objects, mice, drones, and the like through.
-		return 1
-	return ..()
+	usr << "\blue [attached ? attached : "No one"] is attached."

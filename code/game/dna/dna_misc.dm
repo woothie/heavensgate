@@ -236,9 +236,6 @@
 		H.g_eyes = hex2num(getblock(structure,9,3))
 		H.b_eyes = hex2num(getblock(structure,10,3))
 
-		if(H.internal_organs_by_name["eyes"])
-			H.update_eyes()
-
 		if (isblockon(getblock(structure, 11,3),11 , 1))
 			H.gender = FEMALE
 		else
@@ -290,60 +287,60 @@
 
 	if(ismuton(NOBREATHBLOCK,M))
 		if(probinj(45,inj) || (mNobreath in old_mutations))
-			M << "<span class='notice'>You feel no need to breathe.</span>"
+			M << "\blue You feel no need to breathe."
 			M.mutations.Add(mNobreath)
 	if(ismuton(REMOTEVIEWBLOCK,M))
 		if(probinj(45,inj) || (mRemote in old_mutations))
-			M << "<span class='notice'>Your mind expands.</span>"
+			M << "\blue Your mind expands"
 			M.mutations.Add(mRemote)
 	if(ismuton(REGENERATEBLOCK,M))
 		if(probinj(45,inj) || (mRegen in old_mutations))
-			M << "<span class='notice'>You feel strange.</span>"
+			M << "\blue You feel strange"
 			M.mutations.Add(mRegen)
 	if(ismuton(INCREASERUNBLOCK,M))
 		if(probinj(45,inj) || (mRun in old_mutations))
-			M << "<span class='notice'>You feel quick.</span>"
+			M << "\blue You feel quick"
 			M.mutations.Add(mRun)
 	if(ismuton(REMOTETALKBLOCK,M))
 		if(probinj(45,inj) || (mRemotetalk in old_mutations))
-			M << "<span class='notice'>You expand your mind outwards.</span>"
+			M << "\blue You expand your mind outwards"
 			M.mutations.Add(mRemotetalk)
 	if(ismuton(MORPHBLOCK,M))
 		if(probinj(45,inj) || (mMorph in old_mutations))
 			M.mutations.Add(mMorph)
-			M << "<span class='notice'>Your skin feels strange.</span>"
+			M << "\blue Your skin feels strange"
 	if(ismuton(BLENDBLOCK,M))
 		if(probinj(45,inj) || (mBlend in old_mutations))
 			M.mutations.Add(mBlend)
-			M << "<span class='notice'>You feel alone.</span>"
+			M << "\blue You feel alone"
 	if(ismuton(HALLUCINATIONBLOCK,M))
 		if(probinj(45,inj) || (mHallucination in old_mutations))
 			M.mutations.Add(mHallucination)
-			M << "<span class='notice'>Your mind says 'Hello'.</span>"
+			M << "\blue Your mind says 'Hello'"
 	if(ismuton(NOPRINTSBLOCK,M))
 		if(probinj(45,inj) || (mFingerprints in old_mutations))
 			M.mutations.Add(mFingerprints)
-			M << "<span class='notice'>Your fingers feel numb.</span>"
+			M << "\blue Your fingers feel numb"
 	if(ismuton(SHOCKIMMUNITYBLOCK,M))
 		if(probinj(45,inj) || (mShock in old_mutations))
 			M.mutations.Add(mShock)
-			M << "<span class='notice'>You feel strange.</span>"
+			M << "\blue You feel strange"
 	if(ismuton(SMALLSIZEBLOCK,M))
 		if(probinj(45,inj) || (mSmallsize in old_mutations))
-			M << "<span class='notice'>Your skin feels rubbery.</span>"
+			M << "\blue Your skin feels rubbery"
 			M.mutations.Add(mSmallsize)
 
 
 
 	if (isblockon(getblock(M.dna.struc_enzymes, HULKBLOCK,3),HULKBLOCK))
 		if(probinj(5,inj) || (HULK in old_mutations))
-			M << "<span class='notice'>Your muscles hurt.</span>"
+			M << "\blue Your muscles hurt."
 			M.mutations.Add(HULK)
 	if (isblockon(getblock(M.dna.struc_enzymes, HEADACHEBLOCK,3),HEADACHEBLOCK))
 		M.disabilities |= EPILEPSY
-		M << "<span class='warning'>You get a headache.</span>"
+		M << "\red You get a headache."
 	if (isblockon(getblock(M.dna.struc_enzymes, FAKEBLOCK,3),FAKEBLOCK))
-		M << "<span class='warning'>You feel strange.</span>"
+		M << "\red You feel strange."
 		if (prob(95))
 			if(prob(50))
 				randmutb(M)
@@ -353,41 +350,41 @@
 			randmutg(M)
 	if (isblockon(getblock(M.dna.struc_enzymes, COUGHBLOCK,3),COUGHBLOCK))
 		M.disabilities |= COUGHING
-		M << "<span class='warning'>You start coughing.</span>"
+		M << "\red You start coughing."
 	if (isblockon(getblock(M.dna.struc_enzymes, CLUMSYBLOCK,3),CLUMSYBLOCK))
-		M << "<span class='warning'>You feel lightheaded.</span>"
+		M << "\red You feel lightheaded."
 		M.mutations.Add(CLUMSY)
 	if (isblockon(getblock(M.dna.struc_enzymes, TWITCHBLOCK,3),TWITCHBLOCK))
 		M.disabilities |= TOURETTES
-		M << "<span class='warning'>You twitch.</span></span>"
+		M << "\red You twitch."
 	if (isblockon(getblock(M.dna.struc_enzymes, XRAYBLOCK,3),XRAYBLOCK))
 		if(probinj(30,inj) || (XRAY in old_mutations))
-			M << "<span class='notice'>The walls suddenly disappear.</span>"
+			M << "\blue The walls suddenly disappear."
 //			M.sight |= (SEE_MOBS|SEE_OBJS|SEE_TURFS)
 //			M.see_in_dark = 8
 //			M.see_invisible = 2
 			M.mutations.Add(XRAY)
 	if (isblockon(getblock(M.dna.struc_enzymes, NERVOUSBLOCK,3),NERVOUSBLOCK))
 		M.disabilities |= NERVOUS
-		M << "<span class='warning'>You feel nervous.</span>"
+		M << "\red You feel nervous."
 	if (isblockon(getblock(M.dna.struc_enzymes, FIREBLOCK,3),FIREBLOCK))
 		if(probinj(30,inj) || (COLD_RESISTANCE in old_mutations))
-			M << "<span class='warning'>Your body feels warm.</span>"
+			M << "\blue Your body feels warm."
 			M.mutations.Add(COLD_RESISTANCE)
 	if (isblockon(getblock(M.dna.struc_enzymes, BLINDBLOCK,3),BLINDBLOCK))
 		M.sdisabilities |= BLIND
-		M << "<span class='warning'>You can't seem to see anything.</span>"
+		M << "\red You can't seem to see anything."
 	if (isblockon(getblock(M.dna.struc_enzymes, TELEBLOCK,3),TELEBLOCK))
 		if(probinj(15,inj) || (TK in old_mutations))
-			M << "<span class='warning'>You feel smarter.</span>"
+			M << "\blue You feel smarter."
 			M.mutations.Add(TK)
 	if (isblockon(getblock(M.dna.struc_enzymes, DEAFBLOCK,3),DEAFBLOCK))
 		M.sdisabilities |= DEAF
 		M.ear_deaf = 1
-		M << "<span class='warning'>It's kinda quiet..</span>"
+		M << "\red Its kinda quiet.."
 	if (isblockon(getblock(M.dna.struc_enzymes, GLASSESBLOCK,3),GLASSESBLOCK))
 		M.disabilities |= NEARSIGHTED
-		M << "<span class='warning'>Your eyes feel weird...</span>"
+		M << "Your eyes feel weird..."
 
 	/* If you want the new mutations to work, UNCOMMENT THIS.
 	if(istype(M, /mob/living/carbon))
@@ -420,7 +417,7 @@
 			animation.master = src
 			flick("h2monkey", animation)
 			sleep(48)
-			qdel(animation)
+			del(animation)
 
 
 		var/mob/living/carbon/monkey/O = null
@@ -447,7 +444,7 @@
 
 
 		for(var/obj/T in (M.contents-implants))
-			qdel(T)
+			del(T)
 
 		O.loc = M.loc
 
@@ -469,7 +466,7 @@
 			I.loc = O
 			I.implanted = O
 //		O.update_icon = 1	//queue a full icon update at next life() call
-		qdel(M)
+		del(M)
 		return
 
 	if (!isblockon(getblock(M.dna.struc_enzymes, MONKEYBLOCK,3),MONKEYBLOCK) && !istype(M, /mob/living/carbon/human))
@@ -493,7 +490,7 @@
 			animation.master = src
 			flick("monkey2h", animation)
 			sleep(48)
-			qdel(animation)
+			del(animation)
 
 		var/mob/living/carbon/human/O = new( src )
 		if(Mo.greaterform)
@@ -519,7 +516,7 @@
 			M.viruses -= D
 
 		//for(var/obj/T in M)
-		//	qdel(T)
+		//	del(T)
 
 		O.loc = M.loc
 
@@ -553,7 +550,7 @@
 			I.loc = O
 			I.implanted = O
 //		O.update_icon = 1	//queue a full icon update at next life() call
-		qdel(M)
+		del(M)
 		return
 //////////////////////////////////////////////////////////// Monkey Block
 	if(M)

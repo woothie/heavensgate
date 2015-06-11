@@ -8,7 +8,7 @@
 	throwforce = 0
 	throw_speed = 3
 	throw_range = 6
-	origin_tech = list(TECH_BIO = 4)
+	origin_tech = "biotech=4"
 	var/Uses = 1 // uses before it goes inert
 	var/enhanced = 0 //has it been enhanced before?
 
@@ -23,7 +23,7 @@
 			user <<"You apply the enhancer. It now has triple the amount of uses."
 			Uses = 3
 			enhanced = 1
-			qdel(O)
+			del(O)
 
 /obj/item/slime_extract/New()
 	..()
@@ -145,14 +145,14 @@
 		pet.icon_dead = "[M.colour] baby slime dead"
 		pet.colour = "[M.colour]"
 		user <<"You feed the slime the potion, removing it's powers and calming it."
-		qdel(M)
-		var/newname = sanitize(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text, MAX_NAME_LEN)
+		del(M)
+		var/newname = sanitize(copytext(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text,1,MAX_NAME_LEN))
 
 		if (!newname)
 			newname = "pet slime"
 		pet.name = newname
 		pet.real_name = newname
-		qdel(src)
+		del(src)
 
 /obj/item/weapon/slimepotion2
 	name = "advanced docility potion"
@@ -176,14 +176,14 @@
 		pet.icon_dead = "[M.colour] baby slime dead"
 		pet.colour = "[M.colour]"
 		user <<"You feed the slime the potion, removing it's powers and calming it."
-		qdel(M)
-		var/newname = sanitize(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text, MAX_NAME_LEN)
+		del(M)
+		var/newname = sanitize(copytext(input(user, "Would you like to give the slime a name?", "Name your new pet", "pet slime") as null|text,1,MAX_NAME_LEN))
 
 		if (!newname)
 			newname = "pet slime"
 		pet.name = newname
 		pet.real_name = newname
-		qdel(src)
+		del(src)
 
 
 /obj/item/weapon/slimesteroid
@@ -208,7 +208,7 @@
 
 		user <<"You feed the slime the steroid. It now has triple the amount of extract."
 		M.cores = 3
-		qdel(src)
+		del(src)
 
 /obj/item/weapon/slimesteroid2
 	name = "extract enhancer"
@@ -227,7 +227,7 @@
 			user <<"You apply the enhancer. It now has triple the amount of uses."
 			target.Uses = 3
 			target.enahnced = 1
-			qdel(src)*/
+			del(src)*/
 
 /obj/effect/golemrune
 	anchored = 1
@@ -268,7 +268,7 @@
 		G.set_species("Golem")
 		G.key = ghost.key
 		G << "You are an adamantine golem. You move slowly, but are highly resistant to heat and cold as well as blunt trauma. You are unable to wear clothes, but can still use most tools. Serve [user], and assist them in completing their goals at any cost."
-		qdel(src)
+		del (src)
 
 
 	proc/announce_to_ghosts()
@@ -295,7 +295,7 @@
 	throwforce = 1.0
 	throw_speed = 2
 	throw_range = 6
-	origin_tech = list(TECH_BIO = 4)
+	origin_tech = "biotech=4"
 	var/POWERFLAG = 0 // sshhhhhhh
 	var/Flush = 30
 	var/Uses = 5 // uses before it goes inert
@@ -327,7 +327,7 @@
 	icon = 'icons/mob/mob.dmi'
 	icon_state = "slime egg-growing"
 	bitesize = 12
-	origin_tech = list(TECH_BIO = 4)
+	origin_tech = "biotech=4"
 	var/grown = 0
 
 /obj/item/weapon/reagent_containers/food/snacks/egg/slime/New()
@@ -350,7 +350,7 @@
 	spawn(rand(50,100))
 		src.visible_message("<span class='warning'> The [name] bursts open!</span>")
 		new/mob/living/carbon/slime(T)
-		qdel(src)
+		del(src)
 
 
 /obj/item/weapon/reagent_containers/food/snacks/egg/slime/process()
@@ -360,7 +360,7 @@
 		src.Hatch()
 
 /obj/item/weapon/reagent_containers/food/snacks/egg/slime/attackby(obj/item/weapon/W as obj, mob/user as mob)
-	if(istype( W, /obj/item/weapon/pen/crayon ))
+	if(istype( W, /obj/item/toy/crayon ))
 		return
 	else
 		..()

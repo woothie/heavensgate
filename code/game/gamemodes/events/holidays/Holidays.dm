@@ -133,7 +133,7 @@ var/global/Holiday = null
 	world.update_status()
 	Holiday_Game_Start()
 
-	message_admins("<span class='notice'>ADMIN: Event: [key_name(src)] force-set Holiday to \"[Holiday]\"</span>")
+	message_admins("\blue ADMIN: Event: [key_name(src)] force-set Holiday to \"[Holiday]\"")
 	log_admin("[key_name(src)] force-set Holiday to \"[Holiday]\"")
 
 
@@ -174,7 +174,7 @@ var/global/Holiday = null
 				if(isNotStationLevel(S.z))	continue
 				containers += S
 
-			message_admins("<span class='notice'>DEBUG: Event: Egg spawned at [Egg.loc] ([Egg.x],[Egg.y],[Egg.z])</span>")*/
+			message_admins("\blue DEBUG: Event: Egg spawned at [Egg.loc] ([Egg.x],[Egg.y],[Egg.z])")*/
 		if("End of the World")
 			if(prob(eventchance))	GameOver()
 

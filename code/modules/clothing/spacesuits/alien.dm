@@ -9,10 +9,12 @@
 /obj/item/clothing/head/helmet/space/skrell/white
 	icon_state = "skrell_helmet_white"
 	item_state = "skrell_helmet_white"
+	item_color = "skrell_helmet_white"
 
 /obj/item/clothing/head/helmet/space/skrell/black
 	icon_state = "skrell_helmet_black"
 	item_state = "skrell_helmet_black"
+	item_color = "skrell_helmet_black"
 
 /obj/item/clothing/suit/space/skrell
 	name = "Skrellian voidsuit"
@@ -26,10 +28,12 @@
 /obj/item/clothing/suit/space/skrell/white
 	icon_state = "skrell_suit_white"
 	item_state = "skrell_suit_white"
+	item_color = "skrell_suit_white"
 
 /obj/item/clothing/suit/space/skrell/black
 	icon_state = "skrell_suit_black"
 	item_state = "skrell_suit_black"
+	item_color = "skrell_suit_black"
 
 // Vox space gear (vaccuum suit, low pressure armour)
 // Can't be equipped by any other species due to bone structure and vox cybernetics.
@@ -108,6 +112,7 @@
 	name = "alien clothing"
 	desc = "This doesn't look very comfortable."
 	icon_state = "vox-casual-1"
+	item_color = "vox-casual-1"
 	item_state = "vox-casual-1"
 	body_parts_covered = LEGS
 
@@ -115,6 +120,7 @@
 	name = "alien robes"
 	desc = "Weird and flowing!"
 	icon_state = "vox-casual-2"
+	item_color = "vox-casual-2"
 	item_state = "vox-casual-2"
 
 /obj/item/clothing/gloves/yellow/vox
@@ -124,6 +130,7 @@
 	item_state = "gloves-vox"
 	siemens_coefficient = 0
 	permeability_coefficient = 0.05
+	item_color = "gloves-vox"
 	species_restricted = list("Vox")
 	sprite_sheets = list("Vox" = 'icons/mob/species/vox/gloves.dmi')
 /obj/item/clothing/shoes/magboots/vox
@@ -151,12 +158,12 @@
 			user << "You will have to put on the [src] before you can do that."
 			return
 
+
 		flags |= NOSLIP
 		magpulse = 1
 		canremove = 0	//kinda hard to take off magclaws when you are gripping them tightly.
 		user << "You dig your claws deeply into the flooring, bracing yourself."
 		user << "It would be hard to take off the [src] without relaxing your grip first."
-	user.update_action_buttons()
 
 //In case they somehow come off while enabled.
 /obj/item/clothing/shoes/magboots/vox/dropped(mob/user as mob)

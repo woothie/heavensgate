@@ -7,7 +7,7 @@
 	min_force = 4
 	hitsound = 'sound/effects/Glasshit.ogg'
 	maxhealth = 150 //If you change this, consiter changing ../door/window/brigdoor/ health at the bottom of this .dm file
-	health = 150
+	health
 	visible = 0.0
 	use_power = 0
 	flags = ON_BORDER
@@ -25,7 +25,7 @@
 	return
 
 /obj/machinery/door/window/proc/shatter(var/display_message = 1)
-	new /obj/item/weapon/material/shard(src.loc)
+	new /obj/item/weapon/shard(src.loc)
 	var/obj/item/stack/cable_coil/CC = new /obj/item/stack/cable_coil(src.loc)
 	CC.amount = 2
 	var/obj/item/weapon/airlock_electronics/ae
@@ -49,16 +49,16 @@
 	playsound(src, "shatter", 70, 1)
 	if(display_message)
 		visible_message("[src] shatters!")
-	qdel(src)
+	del(src)
 
-/obj/machinery/door/window/Destroy()
+/obj/machinery/door/window/Del()
 	density = 0
 	update_nearby_tiles()
 	..()
 
 /obj/machinery/door/window/Bumped(atom/movable/AM as mob|obj)
 	if (!( ismob(AM) ))
-		var/mob/living/bot/bot = AM
+		var/obj/machinery/bot/bot = AM
 		if(istype(bot))
 			if(density && src.check_access(bot.botcard))
 				open()
@@ -158,7 +158,7 @@
 		var/mob/living/carbon/human/H = user
 		if(H.species.can_shred(H))
 			playsound(src.loc, 'sound/effects/Glasshit.ogg', 75, 1)
-			visible_message("<span class='danger'>[user] smashes against the [src.name].</span>", 1)
+			visible_message("\red <B>[user] smashes against the [src.name].</B>", 1)
 			take_damage(25)
 			return
 	return src.attackby(user, user)
@@ -178,7 +178,7 @@
 			spark_system.start()
 			playsound(src.loc, "sparks", 50, 1)
 			playsound(src.loc, 'sound/weapons/blade1.ogg', 50, 1)
-			visible_message("<span class='warning'>The glass door was sliced open by [user]!</span>")
+			visible_message("\blue The glass door was sliced open by [user]!")
 		flick("[src.base_state]spark", src)
 		sleep(6)
 		open()
@@ -189,7 +189,7 @@
 		playsound(src.loc, 'sound/items/Crowbar.ogg', 100, 1)
 		user.visible_message("[user] removes the electronics from the windoor.", "You start to remove electronics from the windoor.")
 		if (do_after(user,40))
-			user << "<span class='notice'>You removed the windoor electronics!</span>"
+			user << "\blue You removed the windoor electronics!"
 
 			var/obj/structure/windoor_assembly/wa = new/obj/structure/windoor_assembly(src.loc)
 			if (istype(src, /obj/machinery/door/window/brigdoor))
@@ -227,7 +227,7 @@
 	if(src.density && istype(I, /obj/item/weapon) && !istype(I, /obj/item/weapon/card))
 		var/aforce = I.force
 		playsound(src.loc, 'sound/effects/Glasshit.ogg', 75, 1)
-		visible_message("<span class='danger'>[src] was hit by [I].</span>")
+		visible_message("\red <B>[src] was hit by [I].</B>")
 		if(I.damtype == BRUTE || I.damtype == BURN)
 			take_damage(aforce)
 		return
@@ -249,14 +249,13 @@
 
 
 /obj/machinery/door/window/brigdoor
-	name = "secure door"
+	name = "Secure Door"
 	icon = 'icons/obj/doors/windoor.dmi'
 	icon_state = "leftsecure"
 	base_state = "leftsecure"
 	req_access = list(access_security)
 	var/id = null
-	maxhealth = 300
-	health = 300.0 //Stronger doors for prison (regular window door health is 150)
+	health = 300.0 //Stronger doors for prison (regular window door health is 200)
 
 
 /obj/machinery/door/window/northleft

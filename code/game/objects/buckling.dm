@@ -15,15 +15,9 @@
 	if(can_buckle && istype(M))
 		user_buckle_mob(M, user)
 
-//Cleanup
 /obj/Del()
 	unbuckle_mob()
 	return ..()
-
-/obj/Destroy()
-	unbuckle_mob()
-	return ..()
-
 
 /obj/proc/buckle_mob(mob/living/M)
 	if(!can_buckle || !istype(M) || (M.loc != loc) || M.buckled || M.pinned.len || (buckle_require_restraints && !M.restrained()))
@@ -90,4 +84,3 @@
 				"<span class='notice'>You hear metal clanking.</span>")
 		add_fingerprint(user)
 	return M
-

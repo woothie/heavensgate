@@ -35,7 +35,7 @@
 		set src in view(1)
 
 		if(usr.stat || usr.restrained() || usr.lying || !istype(usr, /mob/living))
-			usr << "<span class='warning'>You can't do that.</span>"
+			usr << "\red You can't do that."
 			return
 
 		if(!Adjacent(usr))
@@ -52,14 +52,22 @@
 					O.loc = loc
 			usr << "\The [src] crumbles to pieces."
 			spawn(5)
-				qdel(src)
+				del src
 			return
 
-		stored_computer.loc = loc
-		stored_computer.stat &= ~MAINT
-		stored_computer.update_icon()
-		loc = stored_computer
-		usr << "You open \the [src]."
+		if(!stored_computer.manipulating)
+			stored_computer.manipulating = 1
+			stored_computer.loc = loc
+			stored_computer.stat &= ~MAINT
+			stored_computer.update_icon()
+			loc = null
+			usr << "You open \the [src]."
+
+			spawn(5)
+				stored_computer.manipulating = 0
+				del src
+		else
+			usr << "\red You are already opening the computer!"
 
 
 	AltClick()
@@ -74,10 +82,12 @@
 
 	if(stored_computer)
 		stored_computer.eject_id()
+
 /obj/machinery/computer3/laptop/verb/eject_id()
 	set category = "Object"
 	set name = "Eject ID Card"
 	set src in oview(1)
+
 	var/obj/item/part/computer/cardslot/C = locate() in src.contents
 
 	if(!C)
@@ -94,7 +104,7 @@
 		return
 
 	usr << "You remove [card] from the laptop."
-	C.remove(4)
+	C.remove(card)
 
 
 /obj/machinery/computer3/laptop
@@ -107,6 +117,7 @@
 	pixel_y			= -3
 	show_keyboard	= 0
 
+	var/manipulating = 0 // To prevent disappearing bug
 	var/obj/item/device/laptop/portable = null
 
 	New(var/L, var/built = 0)
@@ -120,11 +131,11 @@
 		set src in view(1)
 
 		if(usr.stat || usr.restrained() || usr.lying || !istype(usr, /mob/living))
-			usr << "<span class='warning'>You can't do that.</span>"
+			usr << "\red You can't do that."
 			return
 
 		if(!Adjacent(usr))
-			usr << "You can't reach it.</span>"
+			usr << "You can't reach it."
 			return
 
 		close_laptop(usr)
@@ -146,11 +157,12 @@
 			portable=new
 			portable.stored_computer = src
 
-		portable.loc = loc
-		loc = portable
-		stat |= MAINT
-		if(user)
-			user << "You close \the [src]."
+		if(!manipulating)
+			portable.loc = loc
+			loc = portable
+			stat |= MAINT
+			if(user)
+				user << "You close \the [src]."
 
 	auto_use_power()
 		if(stat&MAINT)
@@ -173,12 +185,12 @@
 		else
 			stat &= ~NOPOWER
 
-	Destroy()
+	Del()
 		if(istype(loc,/obj/item/device/laptop))
 			var/obj/O = loc
 			spawn(5)
 				if(O)
-					qdel(O)
+					del O
 		..()
 
 

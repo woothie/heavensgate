@@ -20,10 +20,9 @@
 	if(level==1) hide(T.intact)
 	return
 
-/obj/machinery/power/terminal/Destroy()
+/obj/machinery/power/terminal/Del()
 	if(master)
 		master.disconnect_terminal()
-		master = null
 	return ..()
 
 /obj/machinery/power/terminal/hide(var/i)

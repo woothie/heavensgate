@@ -29,7 +29,6 @@
 
 	name = "IIS module"
 	desc = "An integrated intelligence system module suitable for most hardsuits."
-	icon_state = "IIS"
 	toggleable = 1
 	usable = 1
 	disruptive = 0
@@ -45,10 +44,6 @@
 	var/mob/integrated_ai // Direct reference to the actual mob held in the suit.
 	var/obj/item/ai_card  // Reference to the MMI, posibrain, intellicard or pAI card previously holding the AI.
 	var/obj/item/ai_verbs/verb_holder
-
-/obj/item/rig_module/ai_container/process()
-	if(integrated_ai && loc)
-		integrated_ai.SetupStat(loc.get_rig())
 
 /obj/item/rig_module/ai_container/proc/update_verb_holder()
 	if(!verb_holder)
@@ -131,7 +126,7 @@
 	if(!target)
 		if(ai_card)
 			if(istype(ai_card,/obj/item/device/aicard))
-				ai_card.ui_interact(H, state = deep_inventory_state)
+				ai_card.attack_self(H)
 			else
 				eject_ai(H)
 		update_verb_holder()
@@ -157,8 +152,8 @@
 			user << "<span class='danger'>You purge the remaining scraps of data from your previous AI, freeing it for use.</span>"
 			if(integrated_ai)
 				integrated_ai.ghostize()
-				qdel(integrated_ai)
-			if(ai_card) qdel(ai_card)
+				del(integrated_ai)
+			if(ai_card) del(ai_card)
 		else if(user)
 			user.put_in_hands(ai_card)
 		else
@@ -214,7 +209,6 @@
 
 	name = "datajack module"
 	desc = "A simple induction datalink module."
-	icon_state = "datajack"
 	toggleable = 1
 	activates_on_touch = 1
 	usable = 0
@@ -305,7 +299,6 @@
 
 	name = "electrowarfare module"
 	desc = "A bewilderingly complex bundle of fiber optics and chips."
-	icon_state = "ewar"
 	toggleable = 1
 	usable = 0
 
@@ -336,7 +329,6 @@
 
 	name = "hardsuit power sink"
 	desc = "An heavy-duty power sink."
-	icon_state = "powersink"
 	toggleable = 1
 	activates_on_touch = 1
 	disruptive = 0

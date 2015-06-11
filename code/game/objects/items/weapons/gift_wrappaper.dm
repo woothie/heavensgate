@@ -30,27 +30,27 @@
 		user.put_in_active_hand(gift)
 		src.gift.add_fingerprint(user)
 	else
-		user << "<span class='warning'>The gift was empty!</span>"
-	qdel(src)
+		user << "\blue The gift was empty!"
+	del(src)
 	return
 
 /obj/item/weapon/a_gift/ex_act()
-	qdel(src)
+	del(src)
 	return
 
 /obj/effect/spresent/relaymove(mob/user as mob)
 	if (user.stat)
 		return
-	user << "<span class='warning'>You can't move.</span>"
+	user << "\blue You cant move."
 
 /obj/effect/spresent/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
 
 	if (!istype(W, /obj/item/weapon/wirecutters))
-		user << "<span class='warning'>I need wirecutters for that.</span>"
+		user << "\blue I need wirecutters for that."
 		return
 
-	user << "<span class='notice'>You cut open the present.</span>"
+	user << "\blue You cut open the present."
 
 	for(var/mob/M in src) //Should only be one but whatever.
 		M.loc = src.loc
@@ -58,7 +58,7 @@
 			M.client.eye = M.client.mob
 			M.client.perspective = MOB_PERSPECTIVE
 
-	qdel(src)
+	del(src)
 
 /obj/item/weapon/a_gift/attack_self(mob/M as mob)
 	var/gift_type = pick(/obj/item/weapon/sord,
@@ -109,10 +109,10 @@
 	if(!ispath(gift_type,/obj/item))	return
 
 	var/obj/item/I = new gift_type(M)
-	M.remove_from_mob(src)
+	M.u_equip(src)
 	M.put_in_hands(I)
 	I.add_fingerprint(M)
-	qdel(src)
+	del(src)
 	return
 
 /*
@@ -128,12 +128,12 @@
 /obj/item/weapon/wrapping_paper/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
 	if (!( locate(/obj/structure/table, src.loc) ))
-		user << "<span class='warning'>You MUST put the paper on a table!</span>"
+		user << "\blue You MUST put the paper on a table!"
 	if (W.w_class < 4)
 		if ((istype(user.l_hand, /obj/item/weapon/wirecutters) || istype(user.r_hand, /obj/item/weapon/wirecutters)))
 			var/a_used = 2 ** (src.w_class - 1)
 			if (src.amount < a_used)
-				user << "<span class='warning'>You need more paper!</span>"
+				user << "\blue You need more paper!"
 				return
 			else
 				if(istype(W, /obj/item/smallDelivery) || istype(W, /obj/item/weapon/gift)) //No gift wrapping gifts!
@@ -152,12 +152,12 @@
 				src.add_fingerprint(user)
 			if (src.amount <= 0)
 				new /obj/item/weapon/c_tube( src.loc )
-				qdel(src)
+				del(src)
 				return
 		else
-			user << "<span class='warning'>You need scissors!</span>"
+			user << "\blue You need scissors!"
 	else
-		user << "<span class='warning'>The object is FAR too large!</span>"
+		user << "\blue The object is FAR too large!"
 	return
 
 
@@ -185,6 +185,6 @@
 			msg_admin_attack("[key_name(user)] used [src] to wrap [key_name(H)]")
 
 		else
-			user << "<span class='warning'>You need more paper.</span>"
+			user << "\blue You need more paper."
 	else
 		user << "They are moving around too much. A straightjacket would help."

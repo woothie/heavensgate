@@ -36,7 +36,7 @@ datum/track/New(var/title_name, var/audio)
 	)
 
 
-/obj/machinery/media/jukebox/Destroy()
+/obj/machinery/media/jukebox/Del()
 	StopPlaying()
 	..()
 
@@ -160,7 +160,7 @@ datum/track/New(var/title_name, var/audio)
 	s.start()
 
 	new /obj/effect/decal/cleanable/blood/oil(src.loc)
-	qdel(src)
+	del(src)
 
 /obj/machinery/media/jukebox/attackby(obj/item/W as obj, mob/user as mob)
 	src.add_fingerprint(user)
@@ -186,12 +186,12 @@ datum/track/New(var/title_name, var/audio)
 	return ..()
 
 /obj/machinery/media/jukebox/proc/StopPlaying()
-	var/area/main_area = get_area(src)
+	var/area/A = get_area(src)
 	// Always kill the current sound
-	for(var/mob/living/M in mobs_in_area(main_area))
+	for(var/mob/living/M in mobs_in_area(A))
 		M << sound(null, channel = 1)
 
-		main_area.forced_ambience = null
+	A.forced_ambience = null
 	playing = 0
 	update_use_power(1)
 	update_icon()
@@ -202,11 +202,12 @@ datum/track/New(var/title_name, var/audio)
 	if(!current_track)
 		return
 
-	var/area/main_area = get_area(src)
-	main_area.forced_ambience = list(current_track.sound)
-	for(var/mob/living/M in mobs_in_area(main_area))
+	var/area/A = get_area(src)
+	A.forced_ambience = sound(current_track.sound, channel = 1, repeat = 1, volume = 25)
+
+	for(var/mob/living/M in mobs_in_area(A))
 		if(M.mind)
-			main_area.play_ambience(M)
+			A.play_ambience(M)
 
 	playing = 1
 	update_use_power(2)

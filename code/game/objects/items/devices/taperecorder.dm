@@ -5,7 +5,7 @@
 	item_state = "analyzer"
 	w_class = 2.0
 
-	matter = list(DEFAULT_WALL_MATERIAL = 60,"glass" = 30)
+	matter = list("metal" = 60,"glass" = 30)
 
 	var/emagged = 0.0
 	var/recording = 0.0
@@ -29,25 +29,6 @@
 		else
 			storedinfo += "\[[time2text(timerecorded*10,"mm:ss")]\] [M.name] [verb], \"[msg]\""
 
-/obj/item/device/taperecorder/see_emote(mob/M as mob, text, var/emote_type)
-	if(emote_type != 2) //only hearable emotes
-		return
-	if(recording)
-		timestamp += timerecorded
-		storedinfo += "\[[time2text(timerecorded*10,"mm:ss")]\] [strip_html_properly(text)]"
-
-/obj/item/device/taperecorder/show_message(msg, type, alt, alt_type)
-	var/recordedtext
-	if (msg && type == 2) //must be hearable
-		recordedtext = msg
-	else if (alt && alt_type == 2)
-		recordedtext = alt
-	else
-		return
-	if(recording)
-		timestamp += timerecorded
-		storedinfo += "*\[[time2text(timerecorded*10,"mm:ss")]\] *[strip_html_properly(recordedtext)]*" //"*" at front as a marker
-
 /obj/item/device/taperecorder/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
 	if(istype(W, /obj/item/weapon/card/emag))
@@ -67,7 +48,7 @@
 	if(T)
 		T.hotspot_expose(700,125)
 		explosion(T, -1, -1, 0, 4)
-	qdel(src)
+	del(src)
 	return
 
 /obj/item/device/taperecorder/verb/record()
@@ -77,7 +58,7 @@
 	if(usr.stat)
 		return
 	if(emagged == 1)
-		usr << "<span class='warning'>The tape recorder makes a scratchy noise.</span>"
+		usr << "\red The tape recorder makes a scratchy noise."
 		return
 	icon_state = "taperecorderrecording"
 	if(timerecorded < 3600 && playing == 0)
@@ -104,7 +85,7 @@
 	if(usr.stat)
 		return
 	if(emagged == 1)
-		usr << "<span class='warning'>The tape recorder makes a scratchy noise.</span>"
+		usr << "\red The tape recorder makes a scratchy noise."
 		return
 	if(recording == 1)
 		recording = 0
@@ -116,7 +97,7 @@
 	else if(playing == 1)
 		playing = 0
 		var/turf/T = get_turf(src)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: Playback stopped.</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: Playback stopped.</font>")
 		icon_state = "taperecorderidle"
 		return
 
@@ -148,7 +129,7 @@
 	if(usr.stat)
 		return
 	if(emagged == 1)
-		usr << "<span class='warning'>The tape recorder makes a scratchy noise.</span>"
+		usr << "\red The tape recorder makes a scratchy noise."
 		return
 	if(recording == 1)
 		usr << "<span class='notice'>You can't playback when recording!</span>"
@@ -165,40 +146,37 @@
 		if(storedinfo.len < i)
 			break
 		var/turf/T = get_turf(src)
-		var/playedmessage = storedinfo[i]
-		if (findtextEx(playedmessage,"*",1,2)) //remove marker for action sounds
-			playedmessage = copytext(playedmessage,2)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: [playedmessage]</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: [storedinfo[i]]</font>")
 		if(storedinfo.len < i+1)
 			playsleepseconds = 1
 			sleep(10)
 			T = get_turf(src)
-			T.audible_message("<font color=Maroon><B>Tape Recorder</B>: End of recording.</font>")
+			T.visible_message("<font color=Maroon><B>Tape Recorder</B>: End of recording.</font>")
 		else
 			playsleepseconds = timestamp[i+1] - timestamp[i]
 		if(playsleepseconds > 14)
 			sleep(10)
 			T = get_turf(src)
-			T.audible_message("<font color=Maroon><B>Tape Recorder</B>: Skipping [playsleepseconds] seconds of silence</font>")
+			T.visible_message("<font color=Maroon><B>Tape Recorder</B>: Skipping [playsleepseconds] seconds of silence</font>")
 			playsleepseconds = 1
 		i++
 	icon_state = "taperecorderidle"
 	playing = 0
 	if(emagged == 1.0)
 		var/turf/T = get_turf(src)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: This tape recorder will self-destruct in... Five.</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: This tape recorder will self-destruct in... Five.</font>")
 		sleep(10)
 		T = get_turf(src)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: Four.</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: Four.</font>")
 		sleep(10)
 		T = get_turf(src)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: Three.</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: Three.</font>")
 		sleep(10)
 		T = get_turf(src)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: Two.</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: Two.</font>")
 		sleep(10)
 		T = get_turf(src)
-		T.audible_message("<font color=Maroon><B>Tape Recorder</B>: One.</font>")
+		T.visible_message("<font color=Maroon><B>Tape Recorder</B>: One.</font>")
 		sleep(10)
 		explode()
 
@@ -210,7 +188,7 @@
 	if(usr.stat)
 		return
 	if(emagged == 1)
-		usr << "<span class='warning'>The tape recorder makes a scratchy noise.</span>"
+		usr << "\red The tape recorder makes a scratchy noise."
 		return
 	if(!canprint)
 		usr << "<span class='notice'>The recorder can't print that fast!</span>"
@@ -222,10 +200,7 @@
 	var/obj/item/weapon/paper/P = new /obj/item/weapon/paper(get_turf(src))
 	var/t1 = "<B>Transcript:</B><BR><BR>"
 	for(var/i=1,storedinfo.len >= i,i++)
-		var/printedmessage = storedinfo[i]
-		if (findtextEx(printedmessage,"*",1,2)) //replace action sounds
-			printedmessage = "\[[time2text(timestamp[i]*10,"mm:ss")]\] (Unrecognized sound)"
-		t1 += "[printedmessage]<BR>"
+		t1 += "[storedinfo[i]]<BR>"
 	P.info = t1
 	P.name = "Transcript"
 	canprint = 0
@@ -238,11 +213,11 @@
 		if(usr.stat)
 			return
 		if(emagged == 1)
-			usr << "<span class='warning'>The tape recorder makes a scratchy noise.</span>"
+			usr << "\red The tape recorder makes a scratchy noise."
 			return
 		icon_state = "taperecorderrecording"
 		if(timerecorded < 3600 && playing == 0)
-			usr << "<span class='notice'>Recording started.</span>"
+			usr << "\blue Recording started."
 			recording = 1
 			timestamp+= timerecorded
 			storedinfo += "\[[time2text(timerecorded*10,"mm:ss")]\] Recording started."
@@ -255,7 +230,7 @@
 			icon_state = "taperecorderidle"
 			return
 		else
-			usr << "<span class='warning'>Either your tape recorder's memory is full, or it is currently playing back its memory.</span>"
+			usr << "\red Either your tape recorder's memory is full, or it is currently playing back its memory."
 	else
 		if(usr.stat)
 			usr << "Not when you're incapacitated."
@@ -264,7 +239,7 @@
 			recording = 0
 			timestamp+= timerecorded
 			storedinfo += "\[[time2text(timerecorded*10,"mm:ss")]\] Recording stopped."
-			usr << "<span class='notice'>Recording stopped.</span>"
+			usr << "\blue Recording stopped."
 			icon_state = "taperecorderidle"
 			return
 		else if(playing == 1)
@@ -275,5 +250,5 @@
 			icon_state = "taperecorderidle"
 			return
 		else
-			usr << "<span class='warning'>Stop what?</span>"
+			usr << "\red Stop what?"
 			return

@@ -12,7 +12,6 @@
 	name = "mounted grenade launcher"
 	desc = "A shoulder-mounted micro-explosive dispenser."
 	selectable = 1
-	icon_state = "grenadelauncher"
 
 	interface_name = "integrated grenade launcher"
 	interface_desc = "Discharges loaded grenades against the wearer's location."
@@ -47,7 +46,7 @@
 
 	user << "<font color='blue'><b>You slot \the [input_device] into the suit module.</b></font>"
 	user.drop_from_inventory(input_device)
-	qdel(input_device)
+	del(input_device)
 	accepted_item.charges++
 	return 1
 
@@ -87,7 +86,6 @@
 	selectable = 1
 	usable = 1
 	module_cooldown = 0
-	icon_state = "lcannon"
 
 	engage_string = "Configure"
 
@@ -117,7 +115,6 @@
 
 	name = "mounted energy gun"
 	desc = "A forearm-mounted energy projector."
-	icon_state = "egun"
 
 	interface_name = "mounted energy gun"
 	interface_desc = "A forearm-mounted suit-powered energy gun."
@@ -127,8 +124,7 @@
 /obj/item/rig_module/mounted/taser
 
 	name = "mounted taser"
-	desc = "A palm-mounted nonlethal energy projector."
-	icon_state = "taser"
+	desc = "A shoulder-mounted energy projector."
 
 	usable = 0
 
@@ -144,7 +140,6 @@
 
 	name = "energy blade projector"
 	desc = "A powerful cutting beam projector."
-	icon_state = "eblade"
 
 	activate_string = "Project Blade"
 	deactivate_string = "Cancel Blade"
@@ -196,7 +191,7 @@
 
 	for(var/obj/item/weapon/melee/energy/blade/blade in M.contents)
 		M.drop_from_inventory(blade)
-		qdel(blade)
+		del(blade)
 
 /obj/item/rig_module/fabricator
 
@@ -205,14 +200,13 @@
 	selectable = 1
 	usable = 1
 	use_power_cost = 15
-	icon_state = "enet"
 
 	engage_string = "Fabricate Star"
 
 	interface_name = "death blossom launcher"
 	interface_desc = "An integrated microfactory that produces poisoned throwing stars from thin air and electricity."
 
-	var/fabrication_type = /obj/item/weapon/material/star/ninja
+	var/fabrication_type = /obj/item/weapon/star/ninja
 	var/fire_force = 30
 	var/fire_distance = 10
 

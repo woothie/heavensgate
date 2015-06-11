@@ -31,9 +31,9 @@
 	processing_objects.Add(src)
 	return
 
-/obj/item/weapon/tank/Destroy()
+/obj/item/weapon/tank/Del()
 	if(air_contents)
-		qdel(air_contents)
+		del(air_contents)
 
 	processing_objects.Remove(src)
 
@@ -44,33 +44,26 @@
 	if (istype(src.loc, /obj/item/assembly))
 		icon = src.loc
 	if (!in_range(src, user))
-		if (icon == src) user << "<span class='notice'>It's \a \icon[icon][src]! If you want any more information you'll need to get closer.</span>"
+		if (icon == src) user << "\blue It's \a \icon[icon][src]! If you want any more information you'll need to get closer."
 		return
 
 	var/celsius_temperature = src.air_contents.temperature-T0C
 	var/descriptive
-	var/status
 
 	if (celsius_temperature < 20)
 		descriptive = "cold"
-		status = "warning"
 	else if (celsius_temperature < 40)
 		descriptive = "room temperature"
-		status = "notice"
 	else if (celsius_temperature < 80)
 		descriptive = "lukewarm"
-		status = "warning"
 	else if (celsius_temperature < 100)
 		descriptive = "warm"
-		status = "warning"
 	else if (celsius_temperature < 300)
 		descriptive = "hot"
-		status = "danger"
 	else
 		descriptive = "furiously hot"
-		status = "danger"
 
-	user << "<span class='[status]'>\The \icon[icon][src] feels [descriptive]</span>"
+	user << "\blue \The \icon[icon][src] feels [descriptive]"
 
 	return
 
@@ -78,12 +71,12 @@
 	if(prob(50))
 		var/turf/location = src.loc
 		if (!( istype(location, /turf) ))
-			qdel(src)
+			del(src)
 
 		if(src.air_contents)
 			location.assume_air(air_contents)
 
-		qdel(src)
+		del(src)
 
 /obj/item/weapon/tank/attackby(obj/item/weapon/W as obj, mob/user as mob)
 	..()
@@ -94,20 +87,20 @@
 
 	if ((istype(W, /obj/item/device/analyzer)) && get_dist(user, src) <= 1)
 		for (var/mob/O in viewers(user, null))
-			O << "<span class='notice'>\The [user] has used [W] on \icon[icon] [src]</span>"
+			O << "\red [user] has used [W] on \icon[icon] [src]"
 
 		var/pressure = air_contents.return_pressure()
 		manipulated_by = user.real_name			//This person is aware of the contents of the tank.
 		var/total_moles = air_contents.total_moles
 
-		user << "<span class='notice'>Results of analysis of \icon[icon]</span>"
+		user << "\blue Results of analysis of \icon[icon]"
 		if (total_moles>0)
-			user << "<span class='notice'>Pressure: [round(pressure,0.1)] kPa</span>"
+			user << "\blue Pressure: [round(pressure,0.1)] kPa"
 			for(var/g in air_contents.gas)
-				user << "<span class='notice'>[gas_data.name[g]]: [(round(air_contents.gas[g] / total_moles) * 100)]%</span>"
-			user << "<span class='notice'>Temperature: [round(air_contents.temperature-T0C)]&deg;C</span>"
+				user << "\blue [gas_data.name[g]]: [(round(air_contents.gas[g] / total_moles) * 100)]%"
+			user << "\blue Temperature: [round(air_contents.temperature-T0C)]&deg;C"
 		else
-			user << "<span class='notice'>Tank is empty!</span>"
+			user << "\blue Tank is empty!"
 		src.add_fingerprint(user)
 	else if (istype(W,/obj/item/latexballon))
 		var/obj/item/latexballon/LB = W
@@ -202,7 +195,7 @@
 			if(location.internal == src)
 				location.internal = null
 				location.internals.icon_state = "internal0"
-				usr << "<span class='notice'>You close the tank release valve.</span>"
+				usr << "\blue You close the tank release valve."
 				if (location.internals)
 					location.internals.icon_state = "internal0"
 			else
@@ -217,11 +210,11 @@
 
 				if(can_open_valve)
 					location.internal = src
-					usr << "<span class='notice'>You open \the [src] valve.</span>"
+					usr << "\blue You open \the [src] valve."
 					if (location.internals)
 						location.internals.icon_state = "internal1"
 				else
-					usr << "<span class='warning'>You need something to connect to \the [src].</span>"
+					usr << "\blue You need something to connect to \the [src]."
 
 	src.add_fingerprint(usr)
 	return 1
@@ -253,7 +246,7 @@
 
 /obj/item/weapon/tank/process()
 	//Allow for reactions
-	air_contents.react() //cooking up air tanks - add phoron and oxygen, then heat above PHORON_MINIMUM_BURN_TEMPERATURE
+	air_contents.react()
 	check_status()
 
 
@@ -284,22 +277,22 @@
 			round(min(BOMBCAP_LIGHT_RADIUS, range*1.00)), 
 			round(min(BOMBCAP_FLASH_RADIUS, range*1.50)), 
 			)
-		qdel(src)
+		del(src)
 
 	else if(pressure > TANK_RUPTURE_PRESSURE)
-		//world << "<span class='notice'>[x],[y] tank is rupturing: [pressure] kPa, integrity [integrity]</span>"
+		//world << "\blue[x],[y] tank is rupturing: [pressure] kPa, integrity [integrity]"
 		if(integrity <= 0)
 			var/turf/simulated/T = get_turf(src)
 			if(!T)
 				return
 			T.assume_air(air_contents)
 			playsound(src.loc, 'sound/effects/spray.ogg', 10, 1, -3)
-			qdel(src)
+			del(src)
 		else
 			integrity--
 
 	else if(pressure > TANK_LEAK_PRESSURE)
-		//world << "<span class='notice'>[x],[y] tank is leaking: [pressure] kPa, integrity [integrity]</span>"
+		//world << "\blue[x],[y] tank is leaking: [pressure] kPa, integrity [integrity]"
 		if(integrity <= 0)
 			var/turf/simulated/T = get_turf(src)
 			if(!T)

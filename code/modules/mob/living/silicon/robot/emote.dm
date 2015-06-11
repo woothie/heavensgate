@@ -38,9 +38,9 @@
 					param = null
 
 				if (param)
-					message = "salutes to [param]."
+					message = "<B>[src]</B> salutes to [param]."
 				else
-					message = "salutes."
+					message = "<B>[src]</b> salutes."
 			m_type = 1
 		if ("bow")
 			if (!src.buckled)
@@ -54,39 +54,39 @@
 					param = null
 
 				if (param)
-					message = "bows to [param]."
+					message = "<B>[src]</B> bows to [param]."
 				else
-					message = "bows."
+					message = "<B>[src]</B> bows."
 			m_type = 1
 
 		if ("clap")
 			if (!src.restrained())
-				message = "claps."
+				message = "<B>[src]</B> claps."
 				m_type = 2
 		if ("flap")
 			if (!src.restrained())
-				message = "flaps his wings."
+				message = "<B>[src]</B> flaps his wings."
 				m_type = 2
 
 		if ("aflap")
 			if (!src.restrained())
-				message = "flaps his wings ANGRILY!"
+				message = "<B>[src]</B> flaps his wings ANGRILY!"
 				m_type = 2
 
 		if ("twitch")
-			message = "twitches violently."
+			message = "<B>[src]</B> twitches violently."
 			m_type = 1
 
 		if ("twitch_s")
-			message = "twitches."
+			message = "<B>[src]</B> twitches."
 			m_type = 1
 
 		if ("nod")
-			message = "nods."
+			message = "<B>[src]</B> nods."
 			m_type = 1
 
 		if ("deathgasp")
-			message = "shudders violently for a moment, then becomes motionless, its eyes slowly darkening."
+			message = "<B>[src]</B> shudders violently for a moment, then becomes motionless, its eyes slowly darkening."
 			m_type = 1
 
 		if ("glare")
@@ -100,9 +100,9 @@
 				param = null
 
 			if (param)
-				message = "glares at [param]."
+				message = "<B>[src]</B> glares at [param]."
 			else
-				message = "glares."
+				message = "<B>[src]</B> glares."
 
 		if ("stare")
 			var/M = null
@@ -115,9 +115,9 @@
 				param = null
 
 			if (param)
-				message = "stares at [param]."
+				message = "<B>[src]</B> stares at [param]."
 			else
-				message = "stares."
+				message = "<B>[src]</B> stares."
 
 		if ("look")
 			var/M = null
@@ -131,9 +131,9 @@
 				param = null
 
 			if (param)
-				message = "looks at [param]."
+				message = "<B>[src]</B> looks at [param]."
 			else
-				message = "looks."
+				message = "<B>[src]</B> looks."
 			m_type = 1
 
 		if("beep")
@@ -147,9 +147,9 @@
 				param = null
 
 			if (param)
-				message = "beeps at [param]."
+				message = "<B>[src]</B> beeps at [param]."
 			else
-				message = "beeps."
+				message = "<B>[src]</B> beeps."
 			playsound(src.loc, 'sound/machines/twobeep.ogg', 50, 0)
 			m_type = 1
 
@@ -164,9 +164,9 @@
 				param = null
 
 			if (param)
-				message = "pings at [param]."
+				message = "<B>[src]</B> pings at [param]."
 			else
-				message = "pings."
+				message = "<B>[src]</B> pings."
 			playsound(src.loc, 'sound/machines/ping.ogg', 50, 0)
 			m_type = 1
 
@@ -181,15 +181,15 @@
 				param = null
 
 			if (param)
-				message = "buzzes at [param]."
+				message = "<B>[src]</B> buzzes at [param]."
 			else
-				message = "buzzes."
+				message = "<B>[src]</B> buzzes."
 			playsound(src.loc, 'sound/machines/buzz-sigh.ogg', 50, 0)
 			m_type = 1
 
 		if("law")
 			if (istype(module,/obj/item/weapon/robot_module/security))
-				message = "shows its legal authorization barcode."
+				message = "<B>[src]</B> shows its legal authorization barcode."
 
 				playsound(src.loc, 'sound/voice/biamthelaw.ogg', 50, 0)
 				m_type = 2
@@ -211,6 +211,10 @@
 			src << "\blue Unusable emote '[act]'. Say *help for a list."
 
 	if ((message && src.stat == 0))
-		custom_emote(m_type,message)
-
+		if (m_type & 1)
+			for(var/mob/O in viewers(src, null))
+				O.show_message(message, m_type)
+		else
+			for(var/mob/O in hearers(src, null))
+				O.show_message(message, m_type)
 	return

@@ -13,13 +13,13 @@
 					for(var/atom/A in T.contents)
 						if(A.density)
 							blocked = 1
-							usr << "<span class='warning'>You bump into \the [A].</span>"
+							usr << "\red You bump into [A.name]."
 							break
 					if(!blocked)
 						usr.Move(T)
 						usr << "You move upwards."
 				else
-					usr << "<span class='warning'>There is something in your way.</span>"
+					usr << "\red There is something in your way."
 		if (legal == 0)
 			usr << "There is nothing of interest in this direction."
 	return 1
@@ -40,13 +40,13 @@
 					for(var/atom/A in T.contents)
 						if(A.density)
 							blocked = 1
-							usr << "<span class='warning'>You bump into \the [A].</span>"
+							usr << "\red You bump into [A.name]."
 							break
 					if(!blocked)
 						usr.Move(T)
 						usr << "You move downwards."
 				else
-					usr << "<span class='warning'>You cant move through the floor.</span>"
+					usr << "\red You cant move through the floor."
 		if (legal == 0)
 			usr << "There is nothing of interest in this direction."
 	return 1

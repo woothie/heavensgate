@@ -1,5 +1,6 @@
-/datum/nano_module/rcon
+/obj/nano_module/rcon
 	name = "Power RCON"
+
 	var/list/known_SMESs = null
 	var/list/known_breakers = null
 	// Allows you to hide specific parts of the UI
@@ -7,7 +8,7 @@
 	var/hide_SMES_details = 0
 	var/hide_breakers = 0
 
-/datum/nano_module/rcon/ui_interact(mob/user, ui_key = "rcon", datum/nanoui/ui=null, force_open=1, var/datum/topic_state/state = default_state)
+/obj/nano_module/rcon/ui_interact(mob/user, ui_key = "rcon", datum/nanoui/ui=null, force_open=1)
 	FindDevices() // Update our devices list
 	var/data[0]
 
@@ -40,7 +41,7 @@
 
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
 	if (!ui)
-		ui = new(user, src, ui_key, "rcon.tmpl", "RCON Console", 600, 400, state = state)
+		ui = new(user, src, ui_key, "rcon.tmpl", "RCON Console", 600, 400)
 		ui.set_initial_data(data)
 		ui.open()
 		ui.set_auto_update(1)
@@ -48,7 +49,7 @@
 // Proc: Topic()
 // Parameters: 2 (href, href_list - allows us to process UI clicks)
 // Description: Allows us to process UI clicks, which are relayed in form of hrefs.
-/datum/nano_module/rcon/Topic(href, href_list)
+/obj/nano_module/rcon/Topic(href, href_list)
 	if(..())
 		return
 
@@ -92,7 +93,7 @@
 // Proc: GetSMESByTag()
 // Parameters: 1 (tag - RCON tag of SMES we want to look up)
 // Description: Looks up and returns SMES which has matching RCON tag
-/datum/nano_module/rcon/proc/GetSMESByTag(var/tag)
+/obj/nano_module/rcon/proc/GetSMESByTag(var/tag)
 	if(!tag)
 		return
 
@@ -103,7 +104,7 @@
 // Proc: FindDevices()
 // Parameters: None
 // Description: Refreshes local list of known devices.
-/datum/nano_module/rcon/proc/FindDevices()
+/obj/nano_module/rcon/proc/FindDevices()
 	known_SMESs = new /list()
 	for(var/obj/machinery/power/smes/buildable/SMES in machines)
 		if(SMES.RCon_tag && (SMES.RCon_tag != "NO_TAG") && SMES.RCon)

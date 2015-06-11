@@ -11,6 +11,7 @@
 		/obj/item/device/flashlight/pen,
 		/obj/item/seeds,
 		/obj/item/stack/medical,
+		/obj/item/toy/crayon,
 		/obj/item/weapon/coin,
 		/obj/item/weapon/dice,
 		/obj/item/weapon/disk,

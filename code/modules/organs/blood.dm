@@ -55,13 +55,17 @@ var/const/BLOOD_VOLUME_SURVIVE = 122
 							break
 
 				B.volume += 0.1 // regenerate blood VERY slowly
-				if(CE_BLOODRESTORE in chem_effects)
-					B.volume += chem_effects[CE_BLOODRESTORE]
+				if (reagents.has_reagent("nutriment"))	//Getting food speeds it up
+					B.volume += 0.4
+					reagents.remove_reagent("nutriment", 0.1)
+				if (reagents.has_reagent("iron"))	//Hematogen candy anyone?
+					B.volume += 0.8
+					reagents.remove_reagent("iron", 0.1)
 
 		// Damaged heart virtually reduces the blood volume, as the blood isn't
 		// being pumped properly anymore.
 		if(species && species.has_organ["heart"])
-			var/obj/item/organ/heart/heart = internal_organs_by_name["heart"]
+			var/datum/organ/internal/heart/heart = internal_organs_by_name["heart"]
 
 			if(!heart)
 				blood_volume = 0
@@ -123,7 +127,7 @@ var/const/BLOOD_VOLUME_SURVIVE = 122
 
 		//Bleeding out
 		var/blood_max = 0
-		for(var/obj/item/organ/external/temp in organs)
+		for(var/datum/organ/external/temp in organs)
 			if(!(temp.status & ORGAN_BLEEDING) || temp.status & ORGAN_ROBOT)
 				continue
 			for(var/datum/wound/W in temp.wounds) if(W.bleeding())
@@ -196,8 +200,9 @@ var/const/BLOOD_VOLUME_SURVIVE = 122
 	vessel.remove_reagent("blood",amount) // Removes blood if human
 
 //Transfers blood from container ot vessels
-/mob/living/carbon/proc/inject_blood(var/datum/reagent/blood/injected, var/amount)
-	if (!injected || !istype(injected))
+/mob/living/carbon/proc/inject_blood(obj/item/weapon/reagent_containers/container, var/amount)
+	var/datum/reagent/blood/injected = get_blood(container.reagents)
+	if (!injected)
 		return
 	var/list/sniffles = virus_copylist(injected.data["virus2"])
 	for(var/ID in sniffles)
@@ -211,10 +216,14 @@ var/const/BLOOD_VOLUME_SURVIVE = 122
 		src.reagents.add_reagent(C, (text2num(chems[C]) / 560) * amount)//adds trace chemicals to owner's blood
 	reagents.update_total()
 
-//Transfers blood from reagents to vessel, respecting blood types compatability.
-/mob/living/carbon/human/inject_blood(var/datum/reagent/blood/injected, var/amount)
+	container.reagents.remove_reagent("blood", amount)
 
-	if(species.flags & NO_BLOOD)
+//Transfers blood from container ot vessels, respecting blood types compatability.
+/mob/living/carbon/human/inject_blood(obj/item/weapon/reagent_containers/container, var/amount)
+
+	var/datum/reagent/blood/injected = get_blood(container.reagents)
+
+	if(species && species.flags & NO_BLOOD)
 		reagents.add_reagent("blood", amount, injected.data)
 		reagents.update_total()
 		return
@@ -273,13 +282,19 @@ proc/blood_splatter(var/target,var/datum/reagent/blood/source,var/large)
 	if(istype(source,/mob/living/carbon/human))
 		var/mob/living/carbon/human/M = source
 		source = M.get_blood(M.vessel)
+	else if(istype(source,/mob/living/carbon/monkey))
+		var/mob/living/carbon/monkey/donor = source
+		if(donor.dna)
+			source = new()
+			source.data["blood_DNA"] = donor.dna.unique_enzymes
+			source.data["blood_type"] = donor.dna.b_type
 
 	// Are we dripping or splattering?
 	var/list/drips = list()
 	// Only a certain number of drips (or one large splatter) can be on a given turf.
 	for(var/obj/effect/decal/cleanable/blood/drip/drop in T)
 		drips |= drop.drips
-		qdel(drop)
+		del(drop)
 	if(!large && drips.len < 3)
 		decal_type = /obj/effect/decal/cleanable/blood/drip
 

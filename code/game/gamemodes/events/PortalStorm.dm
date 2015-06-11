@@ -23,4 +23,4 @@
 					P.icon_state = "anom"
 					P.name = "wormhole"
 					spawn(rand(100,150))
-						qdel(P)
+						del(P)

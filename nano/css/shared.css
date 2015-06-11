@@ -248,41 +248,33 @@ div.notice {
     clear: both;
 }
 
-.itemContentNarrow, .itemContent {
+.itemLabel {
     float: left;
-}
-
-.itemContentNarrow {
     width: 30%;
-}
-
-.itemContent {
-    width: 69%;
-}
-
-.itemLabelNarrow, .itemLabel, .itemLabelWide, .itemLabelWider, .itemLabelWidest {
-    float: left;
     color: #e9c183;
 }
 
-.itemLabelNarrow {
-    width: 20%;
-}
-
-.itemLabel {
-    width: 30%;
-}
-
-.itemLabelWide {
-    width: 45%;
-}
-
-.itemLabelWider {
+.itemContent {
+    float: left;
     width: 69%;
 }
 
+.itemLabelNarrow {
+    float: left;
+    width: 20%;
+    color: #e9c183;
+}
+
+.itemLabelWide {
+    float: left;
+    width: 45%;
+    color: #e9c183;
+}
+
 .itemLabelWidest {
+    float: left;
     width: 100%;
+    color: #e9c183;
 }
 
 .itemContentWide {

@@ -16,7 +16,7 @@ var/list/admin_datums = list()
 /datum/admins/New(initial_rank = "Temporary Admin", initial_rights = 0, ckey)
 	if(!ckey)
 		error("Admin datum created without a ckey argument. Datum has been deleted")
-		qdel(src)
+		del(src)
 		return
 	admincaster_signature = "Nanotrasen Officer #[rand(0,9)][rand(0,9)][rand(0,9)]"
 	rank = initial_rank
@@ -55,7 +55,8 @@ proc/admin_proc()
 	if(!check_rights(R_ADMIN)) return
 	world << "you have enough rights!"
 
-NOTE: It checks usr by default. Supply the "user" argument if you wish to check for a specific mob.
+NOTE: it checks usr! not src! So if you're checking somebody's rank in a proc which they did not call
+you will have to do something like if(client.holder.rights & R_ADMIN) yourself.
 */
 /proc/check_rights(rights_required, show_msg=1, var/mob/user = usr)
 	if(user && user.client)
@@ -91,5 +92,5 @@ NOTE: It checks usr by default. Supply the "user" argument if you wish to check 
 /client/proc/deadmin()
 	if(holder)
 		holder.disassociate()
-		//qdel(holder)
+		//del(holder)
 	return 1

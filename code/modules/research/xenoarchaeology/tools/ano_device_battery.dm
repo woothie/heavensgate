@@ -190,7 +190,7 @@
 	p = min(p, 100)
 	icon_state = "anodev[round(p,25)]"
 
-/obj/item/weapon/anodevice/Destroy()
+/obj/item/weapon/anodevice/Del()
 	processing_objects.Remove(src)
 	..()
 
