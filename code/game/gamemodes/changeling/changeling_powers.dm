@@ -1,43 +1,3 @@
-var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","Epsilon","Zeta","Eta","Theta","Iota","Kappa","Lambda","Mu","Nu","Xi","Omicron","Pi","Rho","Sigma","Tau","Upsilon","Phi","Chi","Psi","Omega")
-
-/datum/changeling //stores changeling powers, changeling recharge thingie, changeling absorbed DNA and changeling ID (for changeling hivemind)
-	var/list/absorbed_dna = list()
-	var/list/absorbed_species = list()
-	var/list/absorbed_languages = list()
-	var/absorbedcount = 0
-	var/chem_charges = 20
-	var/chem_recharge_rate = 0.5
-	var/chem_storage = 50
-	var/sting_range = 1
-	var/changelingID = "Changeling"
-	var/geneticdamage = 0
-	var/isabsorbing = 0
-	var/geneticpoints = 5
-	var/purchasedpowers = list()
-	var/mimicing = ""
-
-/datum/changeling/New(var/gender=FEMALE)
-	..()
-	var/honorific = (gender == FEMALE) ? "Ms." : "Mr."
-	if(possible_changeling_IDs.len)
-		changelingID = pick(possible_changeling_IDs)
-		possible_changeling_IDs -= changelingID
-		changelingID = "[honorific] [changelingID]"
-	else
-		changelingID = "[honorific] [rand(1,999)]"
-
-/datum/changeling/proc/regenerate()
-	chem_charges = min(max(0, chem_charges+chem_recharge_rate), chem_storage)
-	geneticdamage = max(0, geneticdamage-1)
-
-/datum/changeling/proc/GetDNA(var/dna_owner)
-	var/datum/dna/chosen_dna
-	for(var/datum/dna/DNA in absorbed_dna)
-		if(dna_owner == DNA.real_name)
-			chosen_dna = DNA
-			break
-	return chosen_dna
-
 //Restores our verbs. It will only restore verbs allowed during lesser (monkey) form if we are not human
 /mob/proc/make_changeling()
 
@@ -213,7 +173,7 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 				src << "<span class='notice'>We stab [T] with the proboscis.</span>"
 				src.visible_message("<span class='danger'>[src] stabs [T] with the proboscis!</span>")
 				T << "<span class='danger'>You feel a sharp stabbing pain!</span>"
-				var/obj/item/organ/external/affecting = T.get_organ(src.zone_sel.selecting)
+				var/datum/organ/external/affecting = T.get_organ(src.zone_sel.selecting)
 				if(affecting.take_damage(39,0,1,0,"large organic needle"))
 					T:UpdateDamageIcon()
 
@@ -326,23 +286,63 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 		src << "<span class='warning'>We cannot perform this ability at the present time!</span>"
 		return
 
-	var/mob/living/carbon/human/H = src
-
-	if(!istype(H) || !H.species.primitive_form)
-		src << "<span class='warning'>We cannot perform this ability in this form!</span>"
-		return
-
+	var/mob/living/carbon/C = src
 	changeling.chem_charges--
-	H.remove_changeling_powers()
-	H.visible_message("<span class='warning'>[H] transforms!</span>")
+	C.remove_changeling_powers()
+	C.visible_message("<span class='warning'>[C] transforms!</span>")
 	changeling.geneticdamage = 30
-	H << "<span class='warning'>Our genes cry out!</span>"
+	C << "<span class='warning'>Our genes cry out!</span>"
+
+	//TODO replace with monkeyize proc
 	var/list/implants = list() //Try to preserve implants.
-	for(var/obj/item/weapon/implant/W in H)
+	for(var/obj/item/weapon/implant/W in C)
 		implants += W
-	H.monkeyize()
+
+	C.monkeyizing = 1
+	C.canmove = 0
+	C.icon = null
+	C.overlays.Cut()
+	C.invisibility = 101
+
+	var/atom/movable/overlay/animation = new /atom/movable/overlay( C.loc )
+	animation.icon_state = "blank"
+	animation.icon = 'icons/mob/mob.dmi'
+	animation.master = src
+	flick("h2monkey", animation)
+	sleep(48)
+	del(animation)
+
+	var/mob/living/carbon/monkey/O = new /mob/living/carbon/monkey(src)
+	O.dna = C.dna.Clone()
+	C.dna = null
+
+	for(var/obj/item/W in C)
+		C.drop_from_inventory(W)
+	for(var/obj/T in C)
+		del(T)
+
+	O.loc = C.loc
+	O.name = "monkey ([copytext(md5(C.real_name), 2, 6)])"
+	O.setToxLoss(C.getToxLoss())
+	O.adjustBruteLoss(C.getBruteLoss())
+	O.setOxyLoss(C.getOxyLoss())
+	O.adjustFireLoss(C.getFireLoss())
+	O.stat = C.stat
+	O.a_intent = "hurt"
+	for(var/obj/item/weapon/implant/I in implants)
+		I.loc = O
+		I.implanted = O
+
+	C.mind.transfer_to(O)
+
+	O.make_changeling(1)
+	O.verbs += /mob/proc/changeling_lesser_transform
+	O.changeling_update_languages(changeling.absorbed_languages)
+
 	feedback_add_details("changeling_powers","LF")
+	del(C)
 	return 1
+
 
 //Transform into a human
 /mob/proc/changeling_lesser_transform()
@@ -385,10 +385,16 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 	animation.master = src
 	flick("monkey2h", animation)
 	sleep(48)
-	qdel(animation)
+	del(animation)
 
 	for(var/obj/item/W in src)
-		C.drop_from_inventory(W)
+		C.u_equip(W)
+		if (C.client)
+			C.client.screen -= W
+		if (W)
+			W.loc = C.loc
+			W.dropped(C)
+			W.layer = initial(W.layer)
 
 	var/mob/living/carbon/human/O = new /mob/living/carbon/human( src )
 	if (C.dna.GetUIState(DNA_UI_GENDER))
@@ -400,7 +406,7 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 	O.real_name = chosen_dna.real_name
 
 	for(var/obj/T in C)
-		qdel(T)
+		del(T)
 
 	O.loc = C.loc
 
@@ -420,7 +426,7 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 	O.changeling_update_languages(changeling.absorbed_languages)
 
 	feedback_add_details("changeling_powers","LFT")
-	qdel(C)
+	del(C)
 	return 1
 
 
@@ -463,6 +469,7 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 
 			// sending display messages
 			C << "<span class='notice'>We have regenerated.</span>"
+			C.visible_message("<span class='warning'>[src] appears to wake from the dead, having healed all wounds.</span>")
 
 
 	feedback_add_details("changeling_powers","FD")
@@ -650,7 +657,7 @@ var/list/datum/dna/hivemind_bank = list()
 		src << "<span class='notice'>We return our vocal glands to their original location.</span>"
 		return
 
-	var/mimic_voice = sanitize(input(usr, "Enter a name to mimic.", "Mimic Voice", null), MAX_NAME_LEN)
+	var/mimic_voice = stripped_input(usr, "Enter a name to mimic.", "Mimic Voice", null, MAX_NAME_LEN)
 	if(!mimic_voice)
 		return
 
@@ -795,7 +802,7 @@ var/list/datum/dna/hivemind_bank = list()
 
 	var/mob/living/carbon/T = changeling_sting(40,/mob/proc/changeling_transformation_sting)
 	if(!T)	return 0
-	if((HUSK in T.mutations) || (!ishuman(T) && !issmall(T)))
+	if((HUSK in T.mutations) || (!ishuman(T) && !ismonkey(T)))
 		src << "<span class='warning'>Our sting appears ineffective against its DNA.</span>"
 		return 0
 	T.visible_message("<span class='warning'>[T] transforms!</span>")

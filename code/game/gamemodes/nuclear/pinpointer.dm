@@ -8,7 +8,7 @@
 	item_state = "electronic"
 	throw_speed = 4
 	throw_range = 20
-	matter = list(DEFAULT_WALL_MATERIAL = 500)
+	matter = list("metal" = 500)
 	var/obj/item/weapon/disk/nuclear/the_disk = null
 	var/active = 0
 
@@ -17,11 +17,11 @@
 		if(!active)
 			active = 1
 			workdisk()
-			usr << "<span class='notice'>You activate the pinpointer</span>"
+			usr << "\blue You activate the pinpointer"
 		else
 			active = 0
 			icon_state = "pinoff"
-			usr << "<span>You deactivate the pinpointer</span>"
+			usr << "\blue You deactivate the pinpointer"
 
 	proc/workdisk()
 		if(!active) return
@@ -48,9 +48,6 @@
 			if(bomb.timing)
 				user << "Extreme danger.  Arming signal detected.   Time remaining: [bomb.timeleft]"
 
-/obj/item/weapon/pinpointer/Destroy()
-	active = 0
-	..()
 
 /obj/item/weapon/pinpointer/advpinpointer
 	name = "Advanced Pinpointer"
@@ -69,11 +66,11 @@
 				worklocation()
 			if(mode == 2)
 				workobj()
-			usr << "<span class='notice'>You activate the pinpointer</span>"
+			usr << "\blue You activate the pinpointer"
 		else
 			active = 0
 			icon_state = "pinoff"
-			usr << "<span class='notice'>You deactivate the pinpointer</span>"
+			usr << "\blue You deactivate the pinpointer"
 
 
 	proc/worklocation()

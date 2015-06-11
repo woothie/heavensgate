@@ -108,7 +108,7 @@ mob/verb/test()
 	src.height         = height
 	src.head           = head
 
-/datum/html_interface/Destroy()
+/datum/html_interface/Del() // qdel
 	if (src.clients)
 		for (var/client in src.clients)
 			src.hide(src.clients[client])

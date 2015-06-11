@@ -4,8 +4,8 @@
 	name = "infrared emitter"
 	desc = "Emits a visible or invisible beam and is triggered when the beam is interrupted."
 	icon_state = "infrared"
-	origin_tech = list(TECH_MAGNET = 2)
-	matter = list(DEFAULT_WALL_MATERIAL = 1000, "glass" = 500, "waste" = 100)
+	matter = list("metal" = 1000, "glass" = 500, "waste" = 100)
+	origin_tech = "magnets=2"
 
 	wires = WIRE_PULSE
 
@@ -32,7 +32,7 @@
 			processing_objects.Add(src)
 		else
 			on = 0
-			if(first)	qdel(first)
+			if(first)	del(first)
 			processing_objects.Remove(src)
 		update_icon()
 		return secured
@@ -53,7 +53,7 @@
 	process()//Old code
 		if(!on)
 			if(first)
-				qdel(first)
+				del(first)
 				return
 
 		if((!(first) && (secured && (istype(loc, /turf) || (holder && istype(holder.loc, /turf))))))
@@ -77,7 +77,7 @@
 
 
 	attack_hand()
-		qdel(first)
+		del(first)
 		..()
 		return
 
@@ -86,14 +86,14 @@
 		var/t = dir
 		..()
 		set_dir(t)
-		qdel(first)
+		del(first)
 		return
 
 
 	holder_movement()
 		if(!holder)	return 0
 //		set_dir(holder.dir)
-		qdel(first)
+		del(first)
 		return 1
 
 
@@ -175,7 +175,7 @@
 	if(master)
 		//world << "beam hit \ref[src]: calling master \ref[master].hit"
 		master.trigger_beam()
-	qdel(src)
+	del(src)
 	return
 
 /obj/effect/beam/i_beam/proc/vis_spread(v)
@@ -193,7 +193,7 @@
 
 	if((loc.density || !(master)))
 	//	world << "beam hit loc [loc] or no master [master], deleting"
-		qdel(src)
+		del(src)
 		return
 	//world << "proccess: [src.left] left"
 
@@ -233,17 +233,17 @@
 				return
 		else
 			//world << "is a next: \ref[next], deleting beam \ref[I]"
-			qdel(I)
+			del(I)
 	else
 		//world << "step failed, deleting \ref[next]"
-		qdel(next)
+		del(next)
 	spawn(10)
 		process()
 		return
 	return
 
 /obj/effect/beam/i_beam/Bump()
-	qdel(src)
+	del(src)
 	return
 
 /obj/effect/beam/i_beam/Bumped()
@@ -258,10 +258,7 @@
 		return
 	return
 
-/obj/effect/beam/i_beam/Destroy()
-	if(master.first == src)
-		master.first = null
-	if(next)
-		qdel(next)
-		next = null
+/obj/effect/beam/i_beam/Del()
+	del(next)
 	..()
+	return

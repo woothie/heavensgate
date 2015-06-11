@@ -41,7 +41,7 @@
 				open()
 			else
 				src.req_access = list()
-				src.req_access += pick(get_all_station_access())
+				src.req_access += pick(get_all_accesses())
 	..()
 
 /obj/structure/closet/secure_closet/proc/togglelock(mob/user as mob)

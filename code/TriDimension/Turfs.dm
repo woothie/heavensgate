@@ -71,7 +71,7 @@
 	for(var/obj/effect/landmark/zcontroller/controller in controllerlocation)
 		// check if there is something to draw below
 		if(!controller.down)
-			src.ChangeTurf(get_base_turf(src.z))
+			src.ChangeTurf(/turf/space)
 			return 0
 		else
 			floorbelow = locate(src.x, src.y, controller.down_target)
@@ -109,7 +109,7 @@
 			return
 		var/obj/item/stack/rods/R = C
 		if (R.use(1))
-			user << "<span class='notice'>Constructing support lattice...</span>"
+			user << "\blue Constructing support lattice ..."
 			playsound(src.loc, 'sound/weapons/Genhit.ogg', 50, 1)
 			ReplaceWithLattice()
 		return
@@ -120,11 +120,11 @@
 			var/obj/item/stack/tile/plasteel/S = C
 			if (S.get_amount() < 1)
 				return
-			qdel(L)
+			del(L)
 			playsound(src.loc, 'sound/weapons/Genhit.ogg', 50, 1)
 			S.build(src)
 			S.use(1)
 			return
 		else
-			user << "<span class='warning'>The plating is going to need some support.</span>"
+			user << "\red The plating is going to need some support."
 	return

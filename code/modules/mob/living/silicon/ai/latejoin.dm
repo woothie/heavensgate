@@ -34,10 +34,12 @@ var/global/list/empty_playable_ai_cores = list()
 	job_master.FreeRole(job)
 
 	if(mind.objectives.len)
-		qdel(mind.objectives)
+		del(mind.objectives)
 		mind.special_role = null
-
-	clear_antag_roles(mind)
+	else
+		if(ticker.mode.name == "AutoTraitor")
+			var/datum/game_mode/traitor/autotraitor/current_mode = ticker.mode
+			current_mode.possible_traitors.Remove(src)
 
 	ghostize(0)
-	qdel(src)
+	del(src)

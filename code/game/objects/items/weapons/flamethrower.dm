@@ -10,8 +10,8 @@
 	throw_speed = 1
 	throw_range = 5
 	w_class = 3.0
-	origin_tech = list(TECH_COMBAT = 1, TECH_PHORON = 1)
-	matter = list(DEFAULT_WALL_MATERIAL = 500)
+	matter = list("metal" = 500)
+	origin_tech = "combat=1;phorontech=1"
 	var/status = 0
 	var/throw_amount = 100
 	var/lit = 0	//on or off
@@ -22,13 +22,13 @@
 	var/obj/item/weapon/tank/phoron/ptank = null
 
 
-/obj/item/weapon/flamethrower/Destroy()
+/obj/item/weapon/flamethrower/Del()
 	if(weldtool)
-		qdel(weldtool)
+		del(weldtool)
 	if(igniter)
-		qdel(igniter)
+		del(igniter)
 	if(ptank)
-		qdel(ptank)
+		del(ptank)
 	..()
 	return
 
@@ -82,8 +82,8 @@
 		if(ptank)
 			ptank.loc = T
 			ptank = null
-		PoolOrNew(/obj/item/stack/rods, T)
-		qdel(src)
+		new /obj/item/stack/rods(T)
+		del(src)
 		return
 
 	if(isscrewdriver(W) && igniter && !lit)
@@ -118,14 +118,14 @@
 		var/pressure = ptank.air_contents.return_pressure()
 		var/total_moles = ptank.air_contents.total_moles
 
-		user << "<span class='notice'>Results of analysis of \icon[icon]</span>"
+		user << "\blue Results of analysis of \icon[icon]"
 		if(total_moles>0)
-			user << "<span class='notice'>Pressure: [round(pressure,0.1)] kPa</span>"
+			user << "\blue Pressure: [round(pressure,0.1)] kPa"
 			for(var/g in ptank.air_contents.gas)
-				user << "<span class='notice'>[gas_data.name[g]]: [round((ptank.air_contents.gas[g] / total_moles) * 100)]%</span>"
-			user << "<span class='notice'>Temperature: [round(ptank.air_contents.temperature-T0C)]&deg;C</span>"
+				user << "\blue [gas_data.name[g]]: [round((ptank.air_contents.gas[g] / total_moles) * 100)]%"
+			user << "\blue Temperature: [round(ptank.air_contents.temperature-T0C)]&deg;C"
 		else
-			user << "<span class='notice'>Tank is empty!</span>"
+			user << "\blue Tank is empty!"
 		return
 	..()
 	return

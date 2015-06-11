@@ -306,7 +306,7 @@
 		var/datum/vehicle_dummy_load/dummy_load = load
 		load = dummy_load.actual_load
 		dummy_load.actual_load = null
-		qdel(dummy_load)
+		del(dummy_load)
 		overlays.Cut()
 	..()
 

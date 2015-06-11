@@ -38,7 +38,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	var/burnt = 0
 	var/smoketime = 5
 	w_class = 1.0
-	origin_tech = list(TECH_MATERIAL = 1)
+	origin_tech = "materials=1"
 	attack_verb = list("burnt", "singed")
 
 /obj/item/weapon/flame/match/process()
@@ -93,9 +93,9 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	flags |= NOREACT // so it doesn't react until you light it
 	create_reagents(chem_volume) // making the cigarrete a chemical holder with a maximum volume of 15
 
-/obj/item/clothing/mask/smokable/Destroy()
+/obj/item/clothing/mask/smokable/Del()
 	..()
-	qdel(reagents)
+	del(reagents)
 
 /obj/item/clothing/mask/smokable/process()
 	var/turf/location = get_turf(src)
@@ -106,12 +106,18 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	if(location)
 		location.hotspot_expose(700, 5)
 	if(reagents && reagents.total_volume) // check if it has any reagents at all
-		if(ishuman(loc))
-			var/mob/living/carbon/human/C = loc
-			if (src == C.wear_mask && C.check_has_mouth()) // if it's in the human/monkey mouth, transfer reagents to the mob
-				reagents.trans_to_mob(C, REM, CHEM_INGEST, 0.2) // Most of it is not inhaled... balance reasons.
+		if(iscarbon(loc))
+			var/mob/living/carbon/C = loc
+			if (src == C.wear_mask) // if it's in the human/monkey mouth, transfer reagents to the mob
+				if(istype(C, /mob/living/carbon/human))
+					var/mob/living/carbon/human/H = C
+					if(H.species.flags & IS_SYNTHETIC)
+						return
+
+				reagents.trans_to(C, REAGENTS_METABOLISM, 0.2) // Most of it is not inhaled... balance reasons.
+				reagents.reaction(C)
 		else // else just remove some of the reagents
-			reagents.remove_any(REM)
+			reagents.remove_any(REAGENTS_METABOLISM)
 
 /obj/item/clothing/mask/smokable/proc/light(var/flavor_text = "[usr] lights the [name].")
 	if(!src.lit)
@@ -121,13 +127,13 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 			var/datum/effect/effect/system/reagents_explosion/e = new()
 			e.set_up(round(reagents.get_reagent_amount("phoron") / 2.5, 1), get_turf(src), 0, 0)
 			e.start()
-			qdel(src)
+			del(src)
 			return
 		if(reagents.get_reagent_amount("fuel")) // the fuel explodes, too, but much less violently
 			var/datum/effect/effect/system/reagents_explosion/e = new()
 			e.set_up(round(reagents.get_reagent_amount("fuel") / 5, 1), get_turf(src), 0, 0)
 			e.start()
-			qdel(src)
+			del(src)
 			return
 		flags &= ~NOREACT // allowing reagents to react after being lit
 		reagents.handle_reactions()
@@ -140,12 +146,10 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 			M.update_inv_r_hand(1)
 		var/turf/T = get_turf(src)
 		T.visible_message(flavor_text)
-		set_light(2, 0.25, "#E38F46")
 		processing_objects.Add(src)
 
 /obj/item/clothing/mask/smokable/proc/die(var/nomessage = 0)
 	var/turf/T = get_turf(src)
-	set_light(0)
 	if (type_butt)
 		var/obj/item/butt = new type_butt(T)
 		transfer_fingerprints_to(butt)
@@ -153,12 +157,12 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 			var/mob/living/M = loc
 			if (!nomessage)
 				M << "<span class='notice'>Your [name] goes out.</span>"
-			M.remove_from_mob(src) //un-equip it so the overlays can update
+			M.u_equip(src) //un-equip it so the overlays can update
 			M.update_inv_wear_mask(0)
 			M.update_inv_l_hand(0)
 			M.update_inv_r_hand(1)
 		processing_objects.Remove(src)
-		qdel(src)
+		del(src)
 	else
 		new /obj/effect/decal/cleanable/ash(T)
 		if(ismob(loc))
@@ -226,7 +230,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	if(!proximity)
 		return
 	if(istype(glass)) //you can dip cigarettes into beakers
-		var/transfered = glass.reagents.trans_to_obj(src, chem_volume)
+		var/transfered = glass.reagents.trans_to(src, chem_volume)
 		if(transfered)	//if reagents were transfered, show the message
 			user << "<span class='notice'>You dip \the [src] into \the [glass].</span>"
 		else			//if not, either the beaker was empty, or the cigarette was full
@@ -371,9 +375,9 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 			return
 		smoketime = 1000
 		if(G.reagents)
-			G.reagents.trans_to_obj(src, G.reagents.total_volume)
+			G.reagents.trans_to(src, G.reagents.total_volume)
 		name = "[G.name]-packed [initial(name)]"
-		qdel(G)
+		del(G)
 
 	else if(istype(W, /obj/item/weapon/flame/lighter))
 		var/obj/item/weapon/flame/lighter/L = W
@@ -410,33 +414,35 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	icon = 'icons/obj/items.dmi'
 	icon_state = "lighter-g"
 	item_state = "lighter-g"
+	var/icon_on = "lighter-g-on"
+	var/icon_off = "lighter-g"
 	w_class = 1
 	throwforce = 4
 	flags = CONDUCT
 	slot_flags = SLOT_BELT
 	attack_verb = list("burnt", "singed")
-	var/base_state
 
 /obj/item/weapon/flame/lighter/zippo
 	name = "\improper Zippo lighter"
 	desc = "The zippo."
 	icon_state = "zippo"
 	item_state = "zippo"
+	icon_on = "zippoon"
+	icon_off = "zippo"
 
 /obj/item/weapon/flame/lighter/random
 	New()
-		icon_state = "lighter-[pick("r","c","y","g")]"
-		item_state = icon_state
-		base_state = icon_state
+		var/color = pick("r","c","y","g")
+		icon_on = "lighter-[color]-on"
+		icon_off = "lighter-[color]"
+		icon_state = icon_off
 
 /obj/item/weapon/flame/lighter/attack_self(mob/living/user)
-	if(!base_state)
-		base_state = icon_state
 	if(user.r_hand == src || user.l_hand == src)
 		if(!lit)
 			lit = 1
-			icon_state = "[base_state]on"
-			item_state = "[base_state]on"
+			icon_state = icon_on
+			item_state = icon_on
 			if(istype(src, /obj/item/weapon/flame/lighter/zippo) )
 				user.visible_message("<span class='rose'>Without even breaking stride, [user] flips open and lights [src] in one smooth movement.</span>")
 			else
@@ -450,18 +456,18 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 						user.apply_damage(2,BURN,"r_hand")
 					user.visible_message("<span class='notice'>After a few attempts, [user] manages to light the [src], they however burn their finger in the process.</span>")
 
-			set_light(2)
+			user.SetLuminosity(user.luminosity + 2)
 			processing_objects.Add(src)
 		else
 			lit = 0
-			icon_state = "[base_state]"
-			item_state = "[base_state]"
+			icon_state = icon_off
+			item_state = icon_off
 			if(istype(src, /obj/item/weapon/flame/lighter/zippo) )
 				user.visible_message("<span class='rose'>You hear a quiet click, as [user] shuts off [src] without even looking at what they're doing.")
 			else
 				user.visible_message("<span class='notice'>[user] quietly shuts off the [src].")
 
-			set_light(0)
+			user.SetLuminosity(user.luminosity - 2)
 			processing_objects.Remove(src)
 	else
 		return ..()
@@ -489,4 +495,18 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	var/turf/location = get_turf(src)
 	if(location)
 		location.hotspot_expose(700, 5)
+	return
+
+
+/obj/item/weapon/flame/lighter/pickup(mob/user)
+	if(lit)
+		SetLuminosity(0)
+		user.SetLuminosity(user.luminosity+2)
+	return
+
+
+/obj/item/weapon/flame/lighter/dropped(mob/user)
+	if(lit)
+		user.SetLuminosity(user.luminosity-2)
+		SetLuminosity(2)
 	return

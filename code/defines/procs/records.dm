@@ -22,7 +22,7 @@
 	G.fields["photo_side"]	= side
 	data_core.general += G
 
-	qdel(dummy)
+	del(dummy)
 	return G
 
 /proc/CreateSecurityRecord(var/name as text, var/id as text)

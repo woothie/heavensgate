@@ -30,7 +30,7 @@ obj/machinery/door/airlock/proc/execute_current_command()
 
 	if (!cur_command)
 		return
-
+	
 	do_command(cur_command)
 	if (command_completed(cur_command))
 		cur_command = null
@@ -63,7 +63,7 @@ obj/machinery/door/airlock/proc/do_command(var/command)
 
 			lock()
 			sleep(2)
-
+	
 	send_status()
 
 obj/machinery/door/airlock/proc/command_completed(var/command)
@@ -85,7 +85,7 @@ obj/machinery/door/airlock/proc/command_completed(var/command)
 
 		if("secure_close")
 			return (locked && density)
-
+	
 	return 1	//Unknown command. Just assume it's completed.
 
 obj/machinery/door/airlock/proc/send_status(var/bumped = 0)
@@ -97,7 +97,7 @@ obj/machinery/door/airlock/proc/send_status(var/bumped = 0)
 
 		signal.data["door_status"] = density?("closed"):("open")
 		signal.data["lock_status"] = locked?("locked"):("unlocked")
-
+		
 		if (bumped)
 			signal.data["bumped_with_access"] = 1
 
@@ -142,10 +142,8 @@ obj/machinery/door/airlock/New()
 	if(radio_controller)
 		set_frequency(frequency)
 
-obj/machinery/door/airlock/Destroy()
-	if(frequency && radio_controller)
-		radio_controller.remove_object(src,frequency)
-	..()
+
+
 
 obj/machinery/airlock_sensor
 	icon = 'icons/obj/airlock_machines.dmi'
@@ -217,10 +215,6 @@ obj/machinery/airlock_sensor/New()
 	if(radio_controller)
 		set_frequency(frequency)
 
-obj/machinery/airlock_sensor/Destroy()
-	if(radio_controller)
-		radio_controller.remove_object(src,frequency)
-	..()
 
 obj/machinery/airlock_sensor/airlock_interior
 	command = "cycle_interior"
@@ -261,7 +255,7 @@ obj/machinery/access_button/attackby(obj/item/I as obj, mob/user as mob)
 obj/machinery/access_button/attack_hand(mob/user)
 	add_fingerprint(usr)
 	if(!allowed(user))
-		user << "<span class='warning'>Access Denied</span>"
+		user << "\red Access Denied"
 
 	else if(radio_connection)
 		var/datum/signal/signal = new
@@ -288,11 +282,6 @@ obj/machinery/access_button/New()
 
 	if(radio_controller)
 		set_frequency(frequency)
-
-obj/machinery/access_button/Destroy()
-	if(radio_controller)
-		radio_controller.remove_object(src, frequency)
-	..()
 
 obj/machinery/access_button/airlock_interior
 	frequency = 1379

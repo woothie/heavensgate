@@ -34,10 +34,10 @@ obj/structure/windoor_assembly/New(Loc, start_dir=NORTH, constructed=0)
 			set_dir(start_dir)
 		else //If the user is facing northeast. northwest, southeast, southwest or north, default to north
 			set_dir(NORTH)
-
+	
 	update_nearby_tiles(need_rebuild=1)
 
-obj/structure/windoor_assembly/Destroy()
+obj/structure/windoor_assembly/Del()
 	density = 0
 	update_nearby_tiles()
 	..()
@@ -75,13 +75,13 @@ obj/structure/windoor_assembly/Destroy()
 
 					if(do_after(user, 40))
 						if(!src || !WT.isOn()) return
-						user << "<span class='notice'>You dissasembled the windoor assembly!</span>"
-						new /obj/item/stack/material/glass/reinforced(get_turf(src), 5)
+						user << "\blue You dissasembled the windoor assembly!"
+						new /obj/item/stack/sheet/glass/reinforced(get_turf(src), 5)
 						if(secure)
-							PoolOrNew(/obj/item/stack/rods, list(get_turf(src), 4))
-						qdel(src)
+							new /obj/item/stack/rods(get_turf(src), 4)
+						del(src)
 				else
-					user << "<span class='notice'>You need more welding fuel to dissassemble the windoor assembly.</span>"
+					user << "\blue You need more welding fuel to dissassemble the windoor assembly."
 					return
 
 			//Wrenching an unsecure assembly anchors it in place. Step 4 complete
@@ -91,7 +91,7 @@ obj/structure/windoor_assembly/Destroy()
 
 				if(do_after(user, 40))
 					if(!src) return
-					user << "<span class='notice'>You've secured the windoor assembly!</span>"
+					user << "\blue You've secured the windoor assembly!"
 					src.anchored = 1
 					if(src.secure)
 						src.name = "Secure Anchored Windoor Assembly"
@@ -105,7 +105,7 @@ obj/structure/windoor_assembly/Destroy()
 
 				if(do_after(user, 40))
 					if(!src) return
-					user << "<span class='notice'>You've unsecured the windoor assembly!</span>"
+					user << "\blue You've unsecured the windoor assembly!"
 					src.anchored = 0
 					if(src.secure)
 						src.name = "Secure Windoor Assembly"
@@ -155,7 +155,7 @@ obj/structure/windoor_assembly/Destroy()
 				if(do_after(user, 40))
 					if(!src) return
 
-					user << "<span class='notice'>You cut the windoor wires.!</span>"
+					user << "\blue You cut the windoor wires.!"
 					new/obj/item/stack/cable_coil(get_turf(user), 1)
 					src.state = "01"
 					if(src.secure)
@@ -173,7 +173,7 @@ obj/structure/windoor_assembly/Destroy()
 
 					user.drop_item()
 					W.loc = src
-					user << "<span class='notice'>You've installed the airlock electronics!</span>"
+					user << "\blue You've installed the airlock electronics!"
 					src.name = "Near finished Windoor Assembly"
 					src.electronics = W
 				else
@@ -186,7 +186,7 @@ obj/structure/windoor_assembly/Destroy()
 
 				if(do_after(user, 40))
 					if(!src || !src.electronics) return
-					user << "<span class='notice'>You've removed the airlock electronics!</span>"
+					user << "\blue You've removed the airlock electronics!"
 					if(src.secure)
 						src.name = "Secure Wired Windoor Assembly"
 					else
@@ -198,7 +198,7 @@ obj/structure/windoor_assembly/Destroy()
 			//Crowbar to complete the assembly, Step 7 complete.
 			else if(istype(W, /obj/item/weapon/crowbar))
 				if(!src.electronics)
-					usr << "<span class='warning'>The assembly is missing electronics.</span>"
+					usr << "\red The assembly is missing electronics."
 					return
 				usr << browse(null, "window=windoor_access")
 				playsound(src.loc, 'sound/items/Crowbar.ogg', 100, 1)
@@ -209,7 +209,7 @@ obj/structure/windoor_assembly/Destroy()
 					if(!src) return
 
 					density = 1 //Shouldn't matter but just incase
-					user << "<span class='notice'>You finish the windoor!</span>"
+					user << "\blue You finish the windoor!"
 
 					if(secure)
 						var/obj/machinery/door/window/brigdoor/windoor = new /obj/machinery/door/window/brigdoor(src.loc)
@@ -249,7 +249,7 @@ obj/structure/windoor_assembly/Destroy()
 						src.electronics.loc = windoor
 
 
-					qdel(src)
+					del(src)
 
 
 			else

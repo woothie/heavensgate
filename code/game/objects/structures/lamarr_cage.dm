@@ -13,9 +13,9 @@
 /obj/structure/lamarr/ex_act(severity)
 	switch(severity)
 		if (1)
-			new /obj/item/weapon/material/shard( src.loc )
+			new /obj/item/weapon/shard( src.loc )
 			Break()
-			qdel(src)
+			del(src)
 		if (2)
 			if (prob(50))
 				src.health -= 15
@@ -35,16 +35,23 @@
 
 /obj/structure/lamarr/blob_act()
 	if (prob(75))
-		new /obj/item/weapon/material/shard( src.loc )
+		new /obj/item/weapon/shard( src.loc )
 		Break()
-		qdel(src)
+		del(src)
+
+
+/obj/structure/lamarr/meteorhit(obj/O as obj)
+		new /obj/item/weapon/shard( src.loc )
+		Break()
+		del(src)
+
 
 /obj/structure/lamarr/proc/healthcheck()
 	if (src.health <= 0)
 		if (!( src.destroyed ))
 			src.density = 0
 			src.destroyed = 1
-			new /obj/item/weapon/material/shard( src.loc )
+			new /obj/item/weapon/shard( src.loc )
 			playsound(src, "shatter", 70, 1)
 			Break()
 	else
@@ -69,10 +76,10 @@
 	if (src.destroyed)
 		return
 	else
-		usr << "<span class='notice'>You kick the lab cage.</span>"
+		usr << text("\blue You kick the lab cage.")
 		for(var/mob/O in oviewers())
 			if ((O.client && !( O.blinded )))
-				O << "<span class='warning'>[usr] kicks the lab cage.</span>"
+				O << text("\red [] kicks the lab cage.", usr)
 		src.health -= 2
 		healthcheck()
 		return

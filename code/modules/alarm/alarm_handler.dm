@@ -84,7 +84,8 @@
 	return src
 
 /turf/get_alarm_origin()
-	return get_area(src)
+	var/area/area = get_area(src)
+	return area.master	// Very important to get area.master, as dynamic lightning can and will split areas.
 
 /datum/alarm_handler/proc/register(var/object, var/procName)
 	listeners[object] = procName

@@ -85,6 +85,8 @@
 			return 0
 		if(energy_drain && !chassis.has_charge(energy_drain))
 			return 0
+		if(crit_fail)
+			return 0
 		if(chassis.check_for_support())
 			return 0
 		return 1

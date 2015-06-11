@@ -2,7 +2,6 @@
 	name = "Exosuit Control"
 	icon = 'icons/obj/computer.dmi'
 	icon_state = "mecha"
-	light_color = "#a97faa"
 	req_access = list(access_robotics)
 	circuit = "/obj/item/weapon/circuitboard/mecha_control"
 	var/list/located = list()
@@ -44,9 +43,9 @@
 		var/datum/topic_input/filter = new /datum/topic_input(href,href_list)
 		if(href_list["send_message"])
 			var/obj/item/mecha_parts/mecha_tracking/MT = filter.getObj("send_message")
-			var/message = sanitize(input(usr,"Input message","Transmit message") as text)
+			var/message = strip_html_simple(input(usr,"Input message","Transmit message") as text)
 			var/obj/mecha/M = MT.in_mecha()
-			if(message && M)
+			if(trim(message) && M)
 				M.occupant_message(message)
 			return
 		if(href_list["shock"])
@@ -68,9 +67,9 @@
 	desc = "Device used to transmit exosuit data."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "motion2"
-	origin_tech = list(TECH_DATA = 2, TECH_MAGNET = 2)
+	origin_tech = "programming=2;magnets=2"
 	construction_time = 50
-	construction_cost = list(DEFAULT_WALL_MATERIAL=500)
+	construction_cost = list("metal"=500)
 
 	proc/get_mecha_info()
 		if(!in_mecha())
@@ -91,11 +90,11 @@
 		return answer
 
 	emp_act()
-		qdel(src)
+		del src
 		return
 
 	ex_act()
-		qdel(src)
+		del src
 		return
 
 	proc/in_mecha()
@@ -107,7 +106,7 @@
 		var/obj/mecha/M = in_mecha()
 		if(M)
 			M.emp_act(2)
-		qdel(src)
+		del(src)
 
 	proc/get_mecha_log()
 		if(!src.in_mecha())

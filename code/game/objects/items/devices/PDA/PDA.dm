@@ -308,6 +308,15 @@ var/global/list/obj/item/device/pda/PDAs = list()
 /*
  *	The Actual PDA
  */
+/obj/item/device/pda/pickup(mob/user)
+	if(fon)
+		SetLuminosity(0)
+		user.SetLuminosity(user.luminosity + f_lum)
+
+/obj/item/device/pda/dropped(mob/user)
+	if(fon)
+		user.SetLuminosity(user.luminosity - f_lum)
+		SetLuminosity(f_lum)
 
 /obj/item/device/pda/New()
 	..()
@@ -523,18 +532,20 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 		data["feed"] = feed
 
-	data["manifest"] = list("__json_cache" = ManifestJSON)
-
 	nanoUI = data
 	// update the ui if it exists, returns null if no ui is passed/found
+	if(ui)
+		ui.load_cached_data(ManifestJSON)
 
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
 
 	if (!ui)
 		// the ui does not exist, so we'll create a new() one
 	        // for a list of parameters and their descriptions see the code docs in \code\modules\nano\nanoui.dm
-		ui = new(user, src, ui_key, "pda.tmpl", title, 520, 400, state = inventory_state)
+		ui = new(user, src, ui_key, "pda.tmpl", title, 520, 400)
 		// when the ui is first opened this is the data it will use
+
+		ui.load_cached_data(ManifestJSON)
 
 		ui.set_initial_data(data)
 		// open the new ui window
@@ -606,7 +617,16 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			ownrank = id.rank
 			name = "PDA-[owner] ([ownjob])"
 		if("Eject")//Ejects the cart, only done from hub.
-			verb_remove_cartridge()
+			if (!isnull(cartridge))
+				var/turf/T = loc
+				if(ismob(T))
+					T = T.loc
+				cartridge.loc = T
+				mode = 0
+				scanmode = 0
+				if (cartridge.radio)
+					cartridge.radio.hostpda = null
+				cartridge = null
 
 //MENU FUNCTIONS===================================
 
@@ -633,10 +653,12 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		if("Light")
 			if(fon)
 				fon = 0
-				set_light(0)
+				if(src in U.contents)	U.SetLuminosity(U.luminosity - f_lum)
+				else					SetLuminosity(0)
 			else
 				fon = 1
-				set_light(f_lum)
+				if(src in U.contents)	U.SetLuminosity(U.luminosity + f_lum)
+				else					SetLuminosity(f_lum)
 		if("Medical Scan")
 			if(scanmode == 1)
 				scanmode = 0
@@ -667,7 +689,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		if ("Edit")
 			var/n = input(U, "Please enter message", name, notehtml) as message
 			if (in_range(src, U) && loc == U)
-				n = sanitizeSafe(n, extra = 0)
+				n = copytext(adminscrub(n), 1, MAX_MESSAGE_LEN)
 				if (mode == 1)
 					note = html_decode(n)
 					notehtml = note
@@ -704,7 +726,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 						U << "The PDA softly beeps."
 						ui.close()
 					else
-						t = sanitize(t, 20)
+						t = sanitize(copytext(t, 1, 20))
 						ttone = t
 			else
 				ui.close()
@@ -713,7 +735,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			var/t = input(U, "Please enter new news tone", name, newstone) as text
 			if (in_range(src, U) && loc == U)
 				if (t)
-					t = sanitize(t, 20)
+					t = sanitize(copytext(t, 1, 20))
 					newstone = t
 			else
 				ui.close()
@@ -745,7 +767,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				if(!isnull(P))
 					if (!P.toff && cartridge.charges > 0)
 						cartridge.charges--
-						U.show_message("<span class='notice'>Virus sent!</span>", 1)
+						U.show_message("\blue Virus sent!", 1)
 						P.honkamt = (rand(15,20))
 				else
 					U << "PDA not found."
@@ -758,7 +780,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				if(!isnull(P))
 					if (!P.toff && cartridge.charges > 0)
 						cartridge.charges--
-						U.show_message("<span class='notice'>Virus sent!</span>", 1)
+						U.show_message("\blue Virus sent!", 1)
 						P.message_silent = 1
 						P.news_silent = 1
 						P.ttone = "silence"
@@ -786,10 +808,10 @@ var/global/list/obj/item/device/pda/PDAs = list()
 				var/obj/item/device/pda/P = locate(href_list["target"])
 				var/datum/reception/reception = get_reception(src, P, "", do_sleep = 0)
 				if(!(reception.message_server && reception.telecomms_reception & TELECOMMS_RECEPTION_SENDER))
-					U.show_message("<span class='warning'>An error flashes on your [src]: Connection unavailable</span>", 1)
+					U.show_message("\red An error flashes on your [src]: Connection unavailable", 1)
 					return
 				if(reception.telecomms_reception & TELECOMMS_RECEPTION_RECEIVER == 0) // Does our recepient have a broadcaster on their level?
-					U.show_message("<span class='warning'>An error flashes on your [src]: Recipient unavailable</span>", 1)
+					U.show_message("\red An error flashes on your [src]: Recipient unavailable", 1)
 					return
 				if(!isnull(P))
 					if (!P.toff && cartridge.charges > 0)
@@ -807,15 +829,15 @@ var/global/list/obj/item/device/pda/PDAs = list()
 								difficulty += 3
 
 						if(prob(difficulty))
-							U.show_message("<span class='warning'>An error flashes on your [src].</span>", 1)
+							U.show_message("\red An error flashes on your [src].", 1)
 						else if (prob(difficulty * 7))
-							U.show_message("<span class='warning'>Energy feeds back into your [src]!</span>", 1)
+							U.show_message("\red Energy feeds back into your [src]!", 1)
 							ui.close()
 							detonate_act(src)
 							log_admin("[key_name(U)] just attempted to blow up [P] with the Detomatix cartridge but failed, blowing themselves up")
 							message_admins("[key_name_admin(U)] just attempted to blow up [P] with the Detomatix cartridge but failed.", 1)
 						else
-							U.show_message("<span class='notice'>Success!</span>", 1)
+							U.show_message("\blue Success!", 1)
 							log_admin("[key_name(U)] just attempted to blow up [P] with the Detomatix cartridge and succeeded")
 							message_admins("[key_name_admin(U)] just attempted to blow up [P] with the Detomatix cartridge and succeeded.", 1)
 							detonate_act(P)
@@ -925,14 +947,14 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		j = prob(10)
 
 	if(j) //This kills the PDA
-		qdel(P)
+		P.Del()
 		if(message)
 			message += "It melts in a puddle of plastic."
 		else
 			message += "Your [P] shatters in a thousand pieces!"
 
 	if(M && isliving(M))
-		message = "<span class='warning'>[message]</span>"
+		message = "\red" + message
 		M.show_message(message, 1)
 
 /obj/item/device/pda/proc/remove_id()
@@ -947,12 +969,11 @@ var/global/list/obj/item/device/pda/PDAs = list()
 
 /obj/item/device/pda/proc/create_message(var/mob/living/U = usr, var/obj/item/device/pda/P, var/tap = 1)
 	if(tap)
-		U.visible_message("<span class='notice'>\The [U] taps on \his PDA's screen.</span>")
+		U.visible_message("<span class='notice'>[U] taps on \his PDA's screen.</span>")
 	U.last_target_click = world.time
 	var/t = input(U, "Please enter message", P.name, null) as text
-	t = sanitize(t)
-	//t = readd_quotes(t)
-	t = replace_characters(t, list("&#34;" = "\""))
+	t = sanitize(copytext(t, 1, MAX_MESSAGE_LEN))
+	t = readd_quotes(t)
 	if (!t || !istype(P))
 		return
 	if (!in_range(src, U) && loc != U)
@@ -1047,17 +1068,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 	new_message = 1
 	update_icon()
 
-/obj/item/device/pda/ai/new_message(var/atom/movable/sending_unit, var/sender, var/sender_job, var/message)
-	var/track = ""
-	if(ismob(sending_unit.loc) && isAI(loc))
-		track = "(<a href='byond://?src=\ref[loc];track=\ref[sending_unit.loc];trackname=[html_encode(sender)]'>Follow</a>)"
-
-	var/reception_message = "\icon[src] <b>Message from [sender] ([sender_job]), </b>\"[message]\" (<a href='byond://?src=\ref[src];choice=Message;notap=1;skiprefresh=1;target=\ref[sending_unit]'>Reply</a>) [track]"
-	new_info(message_silent, newstone, reception_message)
-
-	log_pda("[usr] (PDA: [sending_unit]) sent \"[message]\" to [name]")
-	new_message = 1
-
 /obj/item/device/pda/verb/verb_remove_id()
 	set category = "Object"
 	set name = "Remove id"
@@ -1098,30 +1108,6 @@ var/global/list/obj/item/device/pda/PDAs = list()
 	else
 		usr << "<span class='notice'>You cannot do this while restrained.</span>"
 
-/obj/item/device/pda/verb/verb_remove_cartridge()
-	set category = "Object"
-	set name = "Remove cartridge"
-	set src in usr
-
-	if(issilicon(usr))
-		return
-
-	if (can_use(usr) && !isnull(cartridge))
-		var/turf/T = get_turf(src)
-		cartridge.loc = T
-		if (ismob(loc))
-			var/mob/M = loc
-			M.put_in_hands(cartridge)
-		else
-			cartridge.loc = get_turf(src)
-		mode = 0
-		scanmode = 0
-		if (cartridge.radio)
-			cartridge.radio.hostpda = null
-		cartridge = null
-		usr << "<span class='notice'>You remove \the [cartridge] from the [name].</span>"
-	else
-		usr << "<span class='notice'>You cannot do this while restrained.</span>"
 
 /obj/item/device/pda/proc/id_check(mob/user as mob, choice as num)//To check for IDs; 1 for in-pda use, 2 for out of pda use.
 	if(choice == 1)
@@ -1196,59 +1182,56 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			if(1)
 
 				for (var/mob/O in viewers(C, null))
-					O.show_message("<span class='warning'>\The [user] has analyzed [C]'s vitals!</span>", 1)
+					O.show_message("\red [user] has analyzed [C]'s vitals!", 1)
 
-				user.show_message("<span class='notice'>Analyzing Results for [C]:</span>")
-				user.show_message("<span class='notice'>    Overall Status: [C.stat > 1 ? "dead" : "[C.health - C.halloss]% healthy"]</span>", 1)
-				user.show_message(text("<span class='notice'>    Damage Specifics: <span class='[]'>[]</span>-<span class='[]'>[]</span>-<span class='[]'>[]</span>-<span class='[]'>[]</span>",
-						(C.getOxyLoss() > 50) ? "warning" : "", C.getOxyLoss(),
-						(C.getToxLoss() > 50) ? "warning" : "", C.getToxLoss(),
-						(C.getFireLoss() > 50) ? "warning" : "", C.getFireLoss(),
-						(C.getBruteLoss() > 50) ? "warning" : "", C.getBruteLoss()
-						), 1)
-				user.show_message("<span class='notice'>    Key: Suffocation/Toxin/Burns/Brute</span>", 1)
-				user.show_message("<span class='notice'>    Body Temperature: [C.bodytemperature-T0C]&deg;C ([C.bodytemperature*1.8-459.67]&deg;F)</span>", 1)
+				user.show_message("\blue Analyzing Results for [C]:")
+				user.show_message("\blue \t Overall Status: [C.stat > 1 ? "dead" : "[C.health - C.halloss]% healthy"]", 1)
+				user.show_message("\blue \t Damage Specifics: [C.getOxyLoss() > 50 ? "\red" : "\blue"][C.getOxyLoss()]-[C.getToxLoss() > 50 ? "\red" : "\blue"][C.getToxLoss()]-[C.getFireLoss() > 50 ? "\red" : "\blue"][C.getFireLoss()]-[C.getBruteLoss() > 50 ? "\red" : "\blue"][C.getBruteLoss()]", 1)
+				user.show_message("\blue \t Key: Suffocation/Toxin/Burns/Brute", 1)
+				user.show_message("\blue \t Body Temperature: [C.bodytemperature-T0C]&deg;C ([C.bodytemperature*1.8-459.67]&deg;F)", 1)
 				if(C.tod && (C.stat == DEAD || (C.status_flags & FAKEDEATH)))
-					user.show_message("<span class='notice'>    Time of Death: [C.tod]</span>")
+					user.show_message("\blue \t Time of Death: [C.tod]")
 				if(istype(C, /mob/living/carbon/human))
 					var/mob/living/carbon/human/H = C
 					var/list/damaged = H.get_damaged_organs(1,1)
-					user.show_message("<span class='notice'>Localized Damage, Brute/Burn:</span>",1)
+					user.show_message("\blue Localized Damage, Brute/Burn:",1)
 					if(length(damaged)>0)
-						for(var/obj/item/organ/external/org in damaged)
-							user.show_message(text("<span class='notice'>     []: <span class='[]'>[]</span>-<span class='[]'>[]</span>",
-									capitalize(org.name), (org.brute_dam > 0) ? "warning" : "notice", org.brute_dam, (org.burn_dam > 0) ? "warning" : "notice", org.burn_dam),1)
+						for(var/datum/organ/external/org in damaged)
+							user.show_message(text("\blue \t []: []\blue-[]",capitalize(org.display_name),(org.brute_dam > 0)?"\red [org.brute_dam]":0,(org.burn_dam > 0)?"\red [org.burn_dam]":0),1)
 					else
-						user.show_message("<span class='notice'>    Limbs are OK.</span>",1)
+						user.show_message("\blue \t Limbs are OK.",1)
 
 				for(var/datum/disease/D in C.viruses)
 					if(!D.hidden[SCANNER])
-						user.show_message("<span class='warning'>Warning: [D.form] Detected</b>\nName: [D.name].\nType: [D.spread].\nStage: [D.stage]/[D.max_stages].\nPossible Cure: [D.cure]</span>")
+						user.show_message(text("\red <b>Warning: [D.form] Detected</b>\nName: [D.name].\nType: [D.spread].\nStage: [D.stage]/[D.max_stages].\nPossible Cure: [D.cure]"))
 
 			if(2)
 				if (!istype(C:dna, /datum/dna))
-					user << "<span class='notice'>No fingerprints found on [C]</span>"
+					user << "\blue No fingerprints found on [C]"
+				else if(!istype(C, /mob/living/carbon/monkey))
+					if(!isnull(C:gloves))
+						user << "\blue No fingerprints found on [C]"
 				else
-					user << text("<span class='notice'>\The [C]'s Fingerprints: [md5(C:dna.uni_identity)]</span>")
+					user << text("\blue [C]'s Fingerprints: [md5(C:dna.uni_identity)]")
 				if ( !(C:blood_DNA) )
-					user << "<span class='notice'>No blood found on [C]</span>"
+					user << "\blue No blood found on [C]"
 					if(C:blood_DNA)
-						qdel(C:blood_DNA)
+						del(C:blood_DNA)
 				else
-					user << "<span class='notice'>Blood found on [C]. Analysing...</span>"
+					user << "\blue Blood found on [C]. Analysing..."
 					spawn(15)
 						for(var/blood in C:blood_DNA)
-							user << "<span class='notice'>Blood type: [C:blood_DNA[blood]]\nDNA: [blood]</span>"
+							user << "\blue Blood type: [C:blood_DNA[blood]]\nDNA: [blood]"
 
 			if(4)
 				for (var/mob/O in viewers(C, null))
-					O.show_message("<span class='warning'>\The [user] has analyzed [C]'s radiation levels!</span>", 1)
+					O.show_message("\red [user] has analyzed [C]'s radiation levels!", 1)
 
-				user.show_message("<span class='notice'>Analyzing Results for [C]:</span>")
+				user.show_message("\blue Analyzing Results for [C]:")
 				if(C.radiation)
-					user.show_message("<span class='notice'>Radiation Level: [C.radiation]</span>")
+					user.show_message("\green Radiation Level: \black [C.radiation]")
 				else
-					user.show_message("<span class='notice'>No radiation detected.</span>")
+					user.show_message("\blue No radiation detected.")
 
 /obj/item/device/pda/afterattack(atom/A as mob|obj|turf|area, mob/user as mob, proximity)
 	if(!proximity) return
@@ -1260,49 +1243,49 @@ var/global/list/obj/item/device/pda/PDAs = list()
 			if(!isnull(A.reagents))
 				if(A.reagents.reagent_list.len > 0)
 					var/reagents_length = A.reagents.reagent_list.len
-					user << "<span class='notice'>[reagents_length] chemical agent[reagents_length > 1 ? "s" : ""] found.</span>"
+					user << "\blue [reagents_length] chemical agent[reagents_length > 1 ? "s" : ""] found."
 					for (var/re in A.reagents.reagent_list)
-						user << "<span class='notice'>    [re]</span>"
+						user << "\blue \t [re]"
 				else
-					user << "<span class='notice'>No active chemical agents found in [A].</span>"
+					user << "\blue No active chemical agents found in [A]."
 			else
-				user << "<span class='notice'>No significant chemical agents found in [A].</span>"
+				user << "\blue No significant chemical agents found in [A]."
 
 		if(5)
 			if((istype(A, /obj/item/weapon/tank)) || (istype(A, /obj/machinery/portable_atmospherics)))
 				var/obj/icon = A
 				for (var/mob/O in viewers(user, null))
-					O << "<span class='warning'>\The [user] has used [src] on \icon[icon] [A].</span>"
+					O << "\red [user] has used [src] on \icon[icon] [A]"
 				var/pressure = A:air_contents.return_pressure()
 
 				var/total_moles = A:air_contents.total_moles
 
-				user << "<span class='notice'>Results of analysis of \icon[icon]</span>"
+				user << "\blue Results of analysis of \icon[icon]"
 				if (total_moles>0)
-					user << "<span class='notice'>Pressure: [round(pressure,0.1)] kPa</span>"
+					user << "\blue Pressure: [round(pressure,0.1)] kPa"
 					for(var/g in A:air_contents.gas)
-						user << "<span class='notice'>[gas_data.name[g]]: [round((A:air_contents.gas[g] / total_moles) * 100)]%</span>"
-					user << "<span class='notice'>Temperature: [round(A:air_contents.temperature-T0C)]&deg;C</span>"
+						user << "\blue [gas_data.name[g]]: [round((A:air_contents.gas[g] / total_moles) * 100)]%"
+					user << "\blue Temperature: [round(A:air_contents.temperature-T0C)]&deg;C"
 				else
-					user << "<span class='notice'>Tank is empty!</span>"
+					user << "\blue Tank is empty!"
 
 			if (istype(A, /obj/machinery/atmospherics/pipe/tank))
 				var/obj/icon = A
 				for (var/mob/O in viewers(user, null))
-					O << "<span class='warning'>\The [user] has used [src] on \icon[icon] [A]</span>"
+					O << "\red [user] has used [src] on \icon[icon] [A]"
 
 				var/obj/machinery/atmospherics/pipe/tank/T = A
 				var/pressure = T.parent.air.return_pressure()
 				var/total_moles = T.parent.air.total_moles
 
-				user << "<span class='notice'>Results of analysis of \icon[icon]</span>"
+				user << "\blue Results of analysis of \icon[icon]"
 				if (total_moles>0)
-					user << "<span class='notice'>Pressure: [round(pressure,0.1)] kPa</span>"
+					user << "\blue Pressure: [round(pressure,0.1)] kPa"
 					for(var/g in T.parent.air.gas)
-						user << "<span class='notice'>[gas_data.name[g]]: [round((T.parent.air.gas[g] / total_moles) * 100)]%</span>"
-					user << "<span class='notice'>Temperature: [round(T.parent.air.temperature-T0C)]&deg;C</span>"
+						user << "\blue [gas_data.name[g]]: [round((T.parent.air.gas[g] / total_moles) * 100)]%"
+					user << "\blue Temperature: [round(T.parent.air.temperature-T0C)]&deg;C"
 				else
-					user << "<span class='notice'>Tank is empty!</span>"
+					user << "\blue Tank is empty!"
 
 	if (!scanmode && istype(A, /obj/item/weapon/paper) && owner)
 		// JMO 20140705: Makes scanned document show up properly in the notes. Not pretty for formatted documents,
@@ -1351,7 +1334,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		// feature to the PDA, which would better convey the availability of the feature, but this will work for now.
 
 		// Inform the user
-		user << "<span class='notice'>Paper scanned and OCRed to notekeeper.</span>" //concept of scanning paper copyright brainoblivion 2009
+		user << "\blue Paper scanned and OCRed to notekeeper." //concept of scanning paper copyright brainoblivion 2009
 
 
 
@@ -1363,7 +1346,7 @@ var/global/list/obj/item/device/pda/PDAs = list()
 		explosion(T, 0, 0, 1, rand(1,2))
 	return
 
-/obj/item/device/pda/Destroy()
+/obj/item/device/pda/Del()
 	PDAs -= src
 	if (src.id && prob(90)) //IDs are kept in 90% of the cases
 		src.id.loc = get_turf(src.loc)

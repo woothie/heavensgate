@@ -49,7 +49,7 @@
 	for(var/datum/omni_port/P in ports)
 		P.air.volume = ATMOS_DEFAULT_VOLUME_MIXER
 
-/obj/machinery/atmospherics/omni/mixer/Destroy()
+/obj/machinery/atmospherics/omni/mixer/Del()
 	inputs.Cut()
 	output = null
 	..()

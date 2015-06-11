@@ -190,7 +190,7 @@
 				a_right:holder = null
 				a_right.loc = T
 			spawn(0)
-				qdel(src)
+				del(src)
 		return
 
 

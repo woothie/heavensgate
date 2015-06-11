@@ -31,7 +31,7 @@ field_generator power level display
 	var/list/obj/machinery/containment_field/fields
 	var/list/obj/machinery/field_generator/connected_gens
 	var/clean_up = 0
-
+	
 	//If keeping field generators powered is hard then increase the emitter active power usage.
 	var/gen_power_draw = 5500	//power needed per generator
 	var/field_power_draw = 2000	//power needed per field object
@@ -60,6 +60,7 @@ field_generator power level display
 	fields = list()
 	connected_gens = list()
 	return
+
 
 /obj/machinery/field_generator/process()
 	if(Varedit_start == 1)
@@ -166,6 +167,9 @@ field_generator power level display
 	else
 		..()
 
+/obj/machinery/containment_field/meteorhit()
+	return 0
+
 /obj/machinery/field_generator/bullet_act(var/obj/item/projectile/Proj)
 	if(istype(Proj, /obj/item/projectile/beam))
 		power += Proj.damage * EMITTER_DAMAGE_POWER_TRANSFER
@@ -173,7 +177,7 @@ field_generator power level display
 	return 0
 
 
-/obj/machinery/field_generator/Destroy()
+/obj/machinery/field_generator/Del()
 	src.cleanup()
 	..()
 
@@ -227,22 +231,22 @@ field_generator power level display
 //Tries to draw the needed power from our own power reserve, or connected generators if we can. Returns the amount of power we were able to get.
 /obj/machinery/field_generator/proc/draw_power(var/draw = 0, var/list/flood_list = list())
 	flood_list += src
-
+	
 	if(src.power >= draw)//We have enough power
 		src.power -= draw
 		return draw
-
+		
 	//Need more power
 	var/actual_draw = src.power	//already checked that power < draw
 	src.power = 0
-
+	
 	for(var/obj/machinery/field_generator/FG in connected_gens)
 		if (FG in flood_list)
 			continue
 		actual_draw += FG.draw_power(draw - actual_draw, flood_list) //since the flood list reference is shared this actually works.
 		if (actual_draw >= draw)
 			return actual_draw
-
+	
 	return actual_draw
 
 /obj/machinery/field_generator/proc/start_fields()
@@ -321,7 +325,7 @@ field_generator power level display
 	for (var/obj/machinery/containment_field/F in fields)
 		if (isnull(F))
 			continue
-		qdel(F)
+		del(F)
 	fields = list()
 	for(var/obj/machinery/field_generator/FG in connected_gens)
 		if (isnull(FG))
@@ -339,7 +343,7 @@ field_generator power level display
 	//I want to avoid using global variables.
 	spawn(1)
 		var/temp = 1 //stops spam
-		for(var/obj/singularity/O in machines)
+		for(var/obj/machinery/singularity/O in machines)
 			if(O.last_warning && temp)
 				if((world.time - O.last_warning) > 50) //to stop message-spam
 					temp = 0

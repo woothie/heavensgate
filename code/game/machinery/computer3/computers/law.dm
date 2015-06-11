@@ -18,15 +18,15 @@
 
 		opened = !opened
 		if(opened)
-			usr << "<span class='notice'>The access panel is now open.</span>"
+			usr << "\blue The access panel is now open."
 		else
-			usr << "<span class='notice'>The access panel is now closed.</span>"
+			usr << "\blue The access panel is now closed."
 		return
 
 
 	attackby(obj/item/weapon/aiModule/module as obj, mob/user as mob)
 		if (user.z > 6)
-			user << "<span class='danger'>Unable to establish a connection:</span> You're too far away from the station!"
+			user << "\red <b>Unable to establish a connection</b>: \black You're too far away from the station!"
 			return
 		if(istype(module, /obj/item/weapon/aiModule))
 			module.install(src)

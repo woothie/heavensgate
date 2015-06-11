@@ -72,7 +72,7 @@ Radio:
 1355 - Medical
 1357 - Engineering
 1359 - Security
-1341 - deathsquad
+1341 - death squad
 1443 - Confession Intercom
 1347 - Cargo techs
 1349 - Service people
@@ -223,7 +223,7 @@ var/global/datum/controller/radio/radio_controller
 		frequency.remove_listener(device)
 
 		if(frequency.devices.len == 0)
-			qdel(frequency)
+			del(frequency)
 			frequencies -= f_text
 
 	return 1
@@ -248,7 +248,7 @@ var/global/datum/controller/radio/radio_controller
 	if(range)
 		start_point = get_turf(source)
 		if(!start_point)
-			qdel(signal)
+			del(signal)
 			return 0
 	if (filter)
 		send_to_filter(source, signal, filter, start_point, range)
@@ -297,7 +297,7 @@ var/global/datum/controller/radio/radio_controller
 			devices_line -= null
 		if (devices_line.len==0)
 			devices -= devices_filter
-			qdel(devices_line)
+			del(devices_line)
 
 /datum/signal
 	var/obj/source

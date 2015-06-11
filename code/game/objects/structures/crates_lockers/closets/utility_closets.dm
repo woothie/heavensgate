@@ -56,12 +56,12 @@
 
 		// teehee - Ah, tg coders...
 		if ("delete")
-			qdel(src)
+			del(src)
 
 		//If you want to re-add fire, just add "fire" = 15 to the pick list.
 		/*if ("fire")
 			new /obj/structure/closet/firecloset(src.loc)
-			qdel(src)*/
+			del(src)*/
 
 /obj/structure/closet/emcloset/legacy/New()
 	..()

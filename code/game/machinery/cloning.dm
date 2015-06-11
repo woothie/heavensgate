@@ -33,6 +33,7 @@
 	icon = 'icons/obj/cloning.dmi'
 	icon_state = "pod_0"
 	req_access = list(access_genetics) //For premature unlocking.
+
 	var/mob/living/occupant
 	var/heal_level = 20 //The clone is released once its health reaches this level.
 	var/heal_rate = 1
@@ -56,10 +57,8 @@
 	component_parts += new /obj/item/stack/cable_coil(src, 2)
 
 	RefreshParts()
-	update_icon()
 
 /obj/machinery/clonepod/attack_ai(mob/user as mob)
-
 	add_hiddenprint(user)
 	return attack_hand(user)
 
@@ -78,7 +77,6 @@
 	if(mess || attempting)
 		return 0
 	var/datum/mind/clonemind = locate(R.mind)
-
 	if(!istype(clonemind, /datum/mind))	//not a mind
 		return 0
 	if(clonemind.current && clonemind.current.stat != DEAD)	//mind is associated with a non-dead body
@@ -108,6 +106,7 @@
 		R.dna.real_name = "clone ([rand(0,999)])"
 	H.real_name = R.dna.real_name
 
+	icon_state = "pod_1"
 	//Get the clone body ready
 	H.adjustCloneLoss(150) // New damage var so you can't eject a clone early then stab them to abuse the current damage system --NeoFite
 	H.adjustBrainLoss(80) // Even if healed to full health, it will have some brain damage
@@ -122,7 +121,19 @@
 
 	// -- Mode/mind specific stuff goes here
 	callHook("clone", list(H))
-	update_antag_icons(H.mind)
+
+	switch(ticker.mode.name)
+		if("revolution")
+			if((H.mind in ticker.mode:revolutionaries) || (H.mind in ticker.mode:head_revolutionaries))
+				ticker.mode.update_all_rev_icons() //So the icon actually appears
+		if("mercenary")
+			if(H.mind in ticker.mode.syndicates)
+				ticker.mode.update_all_synd_icons()
+		if("cult")
+			if(H.mind in ticker.mode.cult)
+				ticker.mode.add_cultist(occupant.mind)
+				ticker.mode.update_all_cult_icons() //So the icon actually appears
+
 	// -- End mode specific stuff
 
 	if(!R.dna)
@@ -137,7 +148,6 @@
 		H.dna.UpdateUI()
 
 	H.set_cloned_appearance()
-	update_icon()
 
 	for(var/datum/language/L in R.languages)
 		H.add_language(L.name)
@@ -191,6 +201,9 @@
 		occupant = null
 		if(locked)
 			locked = 0
+		if(!mess)
+			icon_state = "pod_0"
+		//use_power(200)
 		return
 
 	return
@@ -227,7 +240,7 @@
 		user << "<span class='notice'>\The [src] processes \the [W].</span>"
 		biomass += 50
 		user.drop_item()
-		qdel(W)
+		del(W)
 		return
 	else if(istype(W, /obj/item/weapon/wrench))
 		if(locked && (anchored || occupant))
@@ -235,7 +248,7 @@
 		else
 			if(anchored)
 				anchored = 0
-				connected.pods -= src
+				connected.pod1 = null
 				connected = null
 			else
 				anchored = 1
@@ -244,11 +257,6 @@
 				user.visible_message("[user] secures [src] to the floor.", "You secure [src] to the floor.")
 			else
 				user.visible_message("[user] unsecures [src] from the floor.", "You unsecure [src] from the floor.")
-	else if(istype(W, /obj/item/device/multitool))
-		var/obj/item/device/multitool/M = W
-		M.connecting = src
-		user << "<span class='notice'>You load connection data from [src] to [M].</span>"
-		return
 	else
 		..()
 
@@ -259,7 +267,7 @@
 	if(!message)
 		return 0
 
-	connected.temp = "[name] : [message]"
+	connected.temp = message
 	connected.updateUsrDialog()
 	return 1
 
@@ -295,32 +303,44 @@
 	if(mess) //Clean that mess and dump those gibs!
 		mess = 0
 		gibs(loc)
-		update_icon()
+		icon_state = "pod_0"
+
+		/*
+		for(var/obj/O in src)
+			O.loc = loc
+		*/
 		return
 
 	if(!(occupant))
 		return
 
+	/*
+	for(var/obj/O in src)
+		O.loc = loc
+	*/
+
 	if(occupant.client)
 		occupant.client.eye = occupant.client.mob
 		occupant.client.perspective = MOB_PERSPECTIVE
 	occupant.loc = loc
+	icon_state = "pod_0"
 	eject_wait = 0 //If it's still set somehow.
 	domutcheck(occupant) //Waiting until they're out before possible monkeyizing.
+//	occupant.add_side_effect("Bad Stomach") // Give them an extra side-effect for free.
 	occupant = null
 
 	biomass -= CLONE_BIOMASS
-	update_icon()
+
 	return
 
 /obj/machinery/clonepod/proc/malfunction()
 	if(occupant)
 		connected_message("Critical Error!")
 		mess = 1
-		update_icon()
+		icon_state = "pod_g"
 		occupant.ghostize()
 		spawn(5)
-			qdel(occupant)
+			del(occupant)
 	return
 
 /obj/machinery/clonepod/relaymove(mob/user as mob)
@@ -340,32 +360,24 @@
 			for(var/atom/movable/A as mob|obj in src)
 				A.loc = loc
 				ex_act(severity)
-			qdel(src)
+			del(src)
 			return
 		if(2.0)
 			if(prob(50))
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 		if(3.0)
 			if(prob(25))
 				for(var/atom/movable/A as mob|obj in src)
 					A.loc = loc
 					ex_act(severity)
-				qdel(src)
+				del(src)
 				return
 		else
 	return
-
-/obj/machinery/clonepod/update_icon()
-	..()
-	icon_state = "pod_0"
-	if (occupant && !(stat & NOPOWER))
-		icon_state = "pod_1"
-	else if (mess)
-		icon_state = "pod_g"
 
 //Health Tracker Implant
 

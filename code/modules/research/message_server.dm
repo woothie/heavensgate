@@ -75,7 +75,7 @@ var/global/list/obj/machinery/message_server/message_servers = list()
 	..()
 	return
 
-/obj/machinery/message_server/Destroy()
+/obj/machinery/message_server/Del()
 	message_servers -= src
 	..()
 	return
@@ -108,34 +108,6 @@ var/global/list/obj/machinery/message_server/message_servers = list()
 
 /obj/machinery/message_server/proc/send_rc_message(var/recipient = "",var/sender = "",var/message = "",var/stamp = "", var/id_auth = "", var/priority = 1)
 	rc_msgs += new/datum/data_rc_msg(recipient,sender,message,stamp,id_auth)
-	var/authmsg = "[message]<br>"
-	if (id_auth)
-		authmsg += "[id_auth]<br>"
-	if (stamp)
-		authmsg += "[stamp]<br>"
-	for (var/obj/machinery/requests_console/Console in allConsoles)
-		if (ckey(Console.department) == ckey(recipient))
-			if(Console.newmessagepriority < priority)
-				Console.newmessagepriority = priority
-				Console.icon_state = "req_comp[priority]"
-			switch(priority)
-				if(2)
-					if(!Console.silent)
-						playsound(Console.loc, 'sound/machines/twobeep.ogg', 50, 1)
-						Console.audible_message(text("\icon[Console] *The Requests Console beeps: 'PRIORITY Alert in [sender]'"),,5)
-					Console.messages += "<B><FONT color='red'>High Priority message from <A href='?src=\ref[Console];write=[ckey(sender)]'>[sender]</A></FONT></B><BR>[authmsg]"
-				if(3)
-					if(!Console.silent)
-						playsound(Console.loc, 'sound/machines/twobeep.ogg', 70, 1)
-						Console.audible_message(text("\icon[Console] *The Requests Console yells: 'EXTREME PRIORITY alert in [sender]'"),,7)
-					Console.messages += "<B><FONT color='red'>Extreme Priority message from <A href='?src=\ref[Console];write=[ckey(sender)]'>[sender]</A></FONT></B><BR>[authmsg]"
-				else
-					if(!Console.silent)
-						playsound(Console.loc, 'sound/machines/twobeep.ogg', 50, 1)
-						Console.audible_message(text("\icon[Console] *The Requests Console beeps: 'Message from [sender]'"),,4)
-					Console.messages += "<B>Message from <A href='?src=\ref[Console];write=[ckey(sender)]'>[sender]</A></B><BR>[authmsg]"
-			Console.set_light(2)
-
 
 /obj/machinery/message_server/attack_hand(user as mob)
 //	user << "\blue There seem to be some parts missing from this server. They should arrive on the station in a few days, give or take a few CentCom delays."
@@ -150,7 +122,7 @@ var/global/list/obj/machinery/message_server/message_servers = list()
 		istype(O,/obj/item/weapon/circuitboard/message_monitor))
 		spamfilter_limit += round(MESSAGE_SERVER_DEFAULT_SPAM_LIMIT / 2)
 		user.drop_item()
-		qdel(O)
+		del(O)
 		user << "You install additional memory and processors into message server. Its filtering capabilities been enhanced."
 	else
 		..(O, user)
@@ -249,14 +221,14 @@ var/obj/machinery/blackbox_recorder/blackbox
 
 	var/list/datum/feedback_variable/feedback = new()
 
-	//Only one can exist in the world!
+	//Only one can exsist in the world!
 /obj/machinery/blackbox_recorder/New()
 	if(blackbox)
 		if(istype(blackbox,/obj/machinery/blackbox_recorder))
-			qdel(src)
+			del(src)
 	blackbox = src
 
-/obj/machinery/blackbox_recorder/Destroy()
+/obj/machinery/blackbox_recorder/Del()
 	var/turf/T = locate(1,1,2)
 	if(T)
 		blackbox = null

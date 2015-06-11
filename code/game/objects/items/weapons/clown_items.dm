@@ -28,7 +28,7 @@
 		user << "<span class='notice'>You need to take that [target.name] off before cleaning it.</span>"
 	else if(istype(target,/obj/effect/decal/cleanable))
 		user << "<span class='notice'>You scrub \the [target.name] out.</span>"
-		qdel(target)
+		del(target)
 	else if(istype(target,/turf))
 		user << "<span class='notice'>You scrub \the [target.name] clean.</span>"
 		var/turf/T = target
@@ -40,7 +40,7 @@
 
 /obj/item/weapon/soap/attack(mob/target as mob, mob/user as mob)
 	if(target && user && ishuman(target) && ishuman(user) && !target.stat && !user.stat && user.zone_sel &&user.zone_sel.selecting == "mouth" )
-		user.visible_message("<span class='danger'>\The [user] washes \the [target]'s mouth out with soap!</span>")
+		user.visible_message("\red \the [user] washes \the [target]'s mouth out with soap!")
 		return
 	..()
 

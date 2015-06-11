@@ -15,6 +15,7 @@
 	cameranet.process_sort()
 
 	var/list/T = list()
+	T["Cancel"] = "Cancel"
 	for (var/obj/machinery/camera/C in cameranet.cameras)
 		var/list/tempnetwork = C.network&src.network
 		if (tempnetwork.len)
@@ -29,10 +30,11 @@
 	set category = "AI Commands"
 	set name = "Show Camera List"
 
-	if(check_unable())
+	if(src.stat == 2)
+		src << "You can't list the cameras because you are dead!"
 		return
 
-	if (!camera)
+	if (!camera || camera == "Cancel")
 		return 0
 
 	var/obj/machinery/camera/C = track.cameras[camera]
@@ -45,22 +47,22 @@
 	set name = "Store Camera Location"
 	set desc = "Stores your current camera location by the given name"
 
-	loc = sanitize(loc)
+	loc = sanitize(copytext(loc, 1, MAX_MESSAGE_LEN))
 	if(!loc)
-		src << "<span class='warning'>Must supply a location name</span>"
+		src << "\red Must supply a location name"
 		return
 
 	if(stored_locations.len >= max_locations)
-		src << "<span class='warning'>Cannot store additional locations. Remove one first</span>"
+		src << "\red Cannot store additional locations. Remove one first"
 		return
 
 	if(loc in stored_locations)
-		src << "<span class='warning'>There is already a stored location by this name</span>"
+		src << "\red There is already a stored location by this name"
 		return
 
 	var/L = src.eyeobj.getLoc()
 	if (InvalidPlayerTurf(get_turf(L)))
-		src << "<span class='warning'>Unable to store this location</span>"
+		src << "\red Unable to store this location"
 		return
 
 	stored_locations[loc] = L
@@ -75,7 +77,7 @@
 	set desc = "Returns to the selected camera location"
 
 	if (!(loc in stored_locations))
-		src << "<span class='warning'>Location [loc] not found</span>"
+		src << "\red Location [loc] not found"
 		return
 
 	var/L = stored_locations[loc]
@@ -87,7 +89,7 @@
 	set desc = "Deletes the selected camera location"
 
 	if (!(loc in stored_locations))
-		src << "<span class='warning'>Location [loc] not found</span>"
+		src << "\red Location [loc] not found"
 		return
 
 	stored_locations.Remove(loc)
@@ -211,7 +213,7 @@
 mob/living/proc/near_camera()
 	if (!isturf(loc))
 		return 0
-	else if(!cameranet.checkVis(src))
+	else if(!cameranet.checkCameraVis(src))
 		return 0
 	return 1
 

@@ -143,9 +143,10 @@
 		if(typekey == null)
 			typekey = /obj/machinery
 		var/list/machines = list()
-		for(var/obj/O in A.contents)
-			if(istype(O,typekey))
-				machines |= O
+		for(var/area/area in A.related)
+			for(var/obj/O in area.contents)
+				if(istype(O,typekey))
+					machines |= O
 		return machines
 	verify_machine(var/obj/previous)
 		if(!previous) return 0

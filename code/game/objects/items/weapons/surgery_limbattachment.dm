@@ -19,36 +19,36 @@
 	else if((user.zone_sel.selecting == "l_leg") && (istype(src, /obj/item/robot_parts/l_leg)))
 		limbloc = "l_foot"
 	else
-		user << "<span class='warning'>That doesn't fit there!</span>"
+		user << "\red That doesn't fit there!"
 		return ..()
 
 	var/mob/living/carbon/human/H = M
 	var/datum/organ/external/S = H.organs[user.zone_sel.selecting]
 	if(S.status & ORGAN_DESTROYED)
 		if(!(S.status & ORGAN_ATTACHABLE))
-			user << "<span class='warning'>The wound is not ready for a replacement!</span>"
+			user << "\red The wound is not ready for a replacement!"
 			return 0
 		if(M != user)
 			M.visible_message( \
-				"<span class='notice'>\The [user] is beginning to attach \the [src] where [H]'s [S.display_name] used to be.</span>", \
-				"<span class='notice'>\The [user] begins to attach \the [src] where your [S.display_name] used to be.</span>")
+				"\red [user] is beginning to attach \the [src] where [H]'s [S.display_name] used to be.", \
+				"\red [user] begins to attach \the [src] where your [S.display_name] used to be.")
 		else
 			M.visible_message( \
-				"<span class='notice'>\The [user] begins to attach a robotic limb where \his [S.display_name] used to be with [src].</span>", \
-				"<span class='notice'>You begin to attach \the [src] where your [S.display_name] used to be.</span>")
+				"\red [user] begins to attach a robotic limb where \his [S.display_name] used to be with [src].", \
+				"\red You begin to attach \the [src] where your [S.display_name] used to be.")
 
 		if(do_mob(user, H, 100))
 			if(M != user)
 				M.visible_message( \
-					"<span class='notice'>\The [user] finishes attaching [H]'s new [S.display_name].</span>", \
-					"<span class='notice'>\The [user] finishes attaching your new [S.display_name].</span>")
+					"\red [user] finishes attaching [H]'s new [S.display_name].", \
+					"\red [user] finishes attaching your new [S.display_name].")
 			else
 				M.visible_message( \
-					"<span class='notice'>\The [user] finishes attaching \his new [S.display_name].</span>", \
-					"<span class='notice'>You finish attaching your new [S.display_name].</span>")
+					"\red [user] finishes attaching \his new [S.display_name].", \
+					"\red You finish attaching your new [S.display_name].")
 
 			if(H == user && prob(25))
-				user << "<span class='warning'>You mess up!</span>"
+				user << "\red You mess up!"
 				S.take_damage(15)
 
 			S.status &= ~ORGAN_BROKEN
@@ -65,7 +65,7 @@
 			H.update_body()
 			M.updatehealth()
 			M.UpdateDamageIcon()
-			qdel(src)
+			del(src)
 
 			return 1
 		return 0

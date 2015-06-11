@@ -5,7 +5,6 @@
 	var/spawning = 0//Referenced when you want to delete the new_player later on in the code.
 	var/totalPlayers = 0		 //Player counts for the Lobby tab
 	var/totalPlayersReady = 0
-
 	universal_speak = 1
 
 	invisibility = 101
@@ -81,7 +80,7 @@
 					stat("Game Mode:", "[master_mode]") // Old setting for showing the game mode
 
 			if(ticker.current_state == GAME_STATE_PREGAME)
-				stat("Time To Start:", "[ticker.pregame_timeleft][round_progressing ? "" : " (DELAYED)"]")
+				stat("Time To Start:", "[ticker.pregame_timeleft][going ? "" : " (DELAYED)"]")
 				stat("Players: [totalPlayers]", "Players Ready: [totalPlayersReady]")
 				totalPlayers = 0
 				totalPlayersReady = 0
@@ -131,14 +130,12 @@
 
 				if(client.prefs.be_random_name)
 					client.prefs.real_name = random_name(client.prefs.gender)
-				if(client.prefs.dummy)
-					qdel(client.prefs.dummy)
 				observer.real_name = client.prefs.real_name
 				observer.name = observer.real_name
 				if(!client.holder && !config.antag_hud_allowed)           // For new ghosts we remove the verb from even showing up if it's not allowed.
 					observer.verbs -= /mob/dead/observer/verb/toggle_antagHUD        // Poor guys, don't know what they are missing!
 				observer.key = key
-				qdel(src)
+				del(src)
 
 				return 1
 
@@ -314,7 +311,7 @@
 		var/mob/living/character = create_character()	//creates the human and transfers vars and mind
 		character = job_master.EquipRank(character, rank, 1)					//equips the human
 		UpdateFactionList(character)
-		equip_custom_items(character)
+		EquipCustomItems(character)
 
 		// AIs don't need a spawnpoint, they must spawn at an empty core
 		if(character.mind.assigned_role == "AI")
@@ -330,8 +327,8 @@
 			AnnounceCyborg(character, rank, "has been downloaded to the empty core in \the [character.loc.loc]")
 			ticker.mode.latespawn(character)
 
-			qdel(C)
-			qdel(src)
+			del(C)
+			del(src)
 			return
 
 		//Find our spawning point.
@@ -361,6 +358,8 @@
 
 		ticker.mode.latespawn(character)
 
+		//ticker.mode.latespawn(character)
+
 		if(character.mind.assigned_role != "Cyborg")
 			data_core.manifest_inject(character)
 			ticker.minds += character.mind//Cyborgs and AIs handle this in the transform proc.	//TODO!!!!! ~Carn
@@ -371,7 +370,7 @@
 		else
 			AnnounceCyborg(character, rank, join_message)
 
-		qdel(src)
+		del(src)
 
 	proc/AnnounceArrival(var/mob/living/carbon/human/character, var/rank, var/join_message)
 		if (ticker.current_state == GAME_STATE_PLAYING)
@@ -452,8 +451,7 @@
 			client.prefs.randomize_appearance_for(new_character)
 		else
 			client.prefs.copy_to(new_character)
-		if(client.prefs.dummy)
-			qdel(client.prefs.dummy)
+
 		src << sound(null, repeat = 0, wait = 0, volume = 85, channel = 1) // MAD JAMS cant last forever yo
 
 		if(mind)
@@ -477,8 +475,6 @@
 		//new_character.dna.UpdateSE()
 
 		// Do the initial caching of the player's body icons.
-		new_character.force_update_limbs()
-		new_character.update_eyes()
 		new_character.regenerate_icons()
 
 		new_character.key = key		//Manually transfer the key to log them in

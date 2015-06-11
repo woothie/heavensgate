@@ -38,15 +38,15 @@
 			if(WEST)
 				initialize_directions = NORTH|SOUTH
 
-	Destroy()
+	Del()
 		loc = null
 
 		if(node1)
 			node1.disconnect(src)
-			qdel(network1)
+			del(network1)
 		if(node2)
 			node2.disconnect(src)
-			qdel(network2)
+			del(network2)
 
 		node1 = null
 		node2 = null
@@ -91,7 +91,7 @@
 	attackby(obj/item/weapon/W as obj, mob/user as mob)
 		if(istype(W, /obj/item/weapon/wrench))
 			anchored = !anchored
-			user << "<span class='notice'>You [anchored ? "secure" : "unsecure"] the bolts holding \the [src] to the floor.</span>"
+			user << "\blue You [anchored ? "secure" : "unsecure"] the bolts holding [src] to the floor."
 
 			if(anchored)
 				if(dir & (NORTH|SOUTH))
@@ -110,10 +110,10 @@
 			else
 				if(node1)
 					node1.disconnect(src)
-					qdel(network1)
+					del(network1)
 				if(node2)
 					node2.disconnect(src)
-					qdel(network2)
+					del(network2)
 
 				node1 = null
 				node2 = null
@@ -216,11 +216,11 @@
 
 	disconnect(obj/machinery/atmospherics/reference)
 		if(reference==node1)
-			qdel(network1)
+			del(network1)
 			node1 = null
 
 		else if(reference==node2)
-			qdel(network2)
+			del(network2)
 			node2 = null
 
 		return null
@@ -263,7 +263,7 @@
 		if(istype(W, /obj/item/weapon/wrench))
 			anchored = !anchored
 			turbine = null
-			user << "<span class='notice'>You [anchored ? "secure" : "unsecure"] the bolts holding \the [src] to the floor.</span>"
+			user << "\blue You [anchored ? "secure" : "unsecure"] the bolts holding [src] to the floor."
 			updateConnection()
 		else
 			..()

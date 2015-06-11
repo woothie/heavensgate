@@ -41,7 +41,7 @@ var/list/wood_icons = list("wood","wood-broken")
 	var/lava = 0
 	var/broken = 0
 	var/burnt = 0
-	var/mineral = DEFAULT_WALL_MATERIAL
+	var/mineral = "metal"
 	var/floor_type = /obj/item/stack/tile/plasteel
 	var/lightfloor_state // for light floors, this is the state of the tile. 0-7, 0x4 is on-bit - use the helper procs below
 
@@ -80,21 +80,21 @@ var/list/wood_icons = list("wood","wood-broken")
 	//set src in oview(1)
 	switch(severity)
 		if(1.0)
-			src.ChangeTurf(get_base_turf(src.z))
+			src.ChangeTurf(/turf/space)
 		if(2.0)
-			switch(pick(40;1,40;2,3))
+			switch(pick(1,2;75,3))
 				if (1)
-					if(prob(33)) new /obj/item/stack/material/steel(src)
 					src.ReplaceWithLattice()
+					if(prob(33)) new /obj/item/stack/sheet/metal(src)
 				if(2)
-					src.ChangeTurf(get_base_turf(src.z))
+					src.ChangeTurf(/turf/space)
 				if(3)
-					if(prob(33)) new /obj/item/stack/material/steel(src)
 					if(prob(80))
 						src.break_tile_to_plating()
 					else
 						src.break_tile()
 					src.hotspot_expose(1000,CELL_VOLUME)
+					if(prob(33)) new /obj/item/stack/sheet/metal(src)
 		if(3.0)
 			if (prob(50))
 				src.break_tile()
@@ -133,19 +133,19 @@ turf/simulated/floor/proc/update_icon()
 			switch(get_lightfloor_state())
 				if(LIGHTFLOOR_STATE_OK)
 					icon_state = "light_on"
-					set_light(5)
+					SetLuminosity(5)
 				if(LIGHTFLOOR_STATE_FLICKER)
 					var/num = pick("1","2","3","4")
 					icon_state = "light_on_flicker[num]"
-					set_light(5)
+					SetLuminosity(5)
 				if(LIGHTFLOOR_STATE_BREAKING)
 					icon_state = "light_on_broken"
-					set_light(5)
+					SetLuminosity(5)
 				if(LIGHTFLOOR_STATE_BROKEN)
 					icon_state = "light_off"
-					set_light(0)
+					SetLuminosity(0)
 		else
-			set_light(0)
+			SetLuminosity(0)
 			icon_state = "light_off"
 	else if(is_grass_floor())
 		if(!broken && !burnt)
@@ -339,7 +339,7 @@ turf/simulated/floor/proc/update_icon()
 
 	if(!floor_type) return
 	icon_plating = "plating"
-	set_light(0)
+	SetLuminosity(0)
 	floor_type = null
 	intact = 0
 	broken = 0
@@ -355,7 +355,7 @@ turf/simulated/floor/proc/update_icon()
 	broken = 0
 	burnt = 0
 	intact = 1
-	set_light(0)
+	SetLuminosity(0)
 	if(T)
 		if(istype(T,/obj/item/stack/tile/plasteel))
 			floor_type = T.type
@@ -456,27 +456,27 @@ turf/simulated/floor/proc/update_icon()
 	if(istype(C,/obj/item/weapon/light/bulb)) //only for light tiles
 		if(is_light_floor())
 			if(get_lightfloor_state())
-				user.remove_from_mob(C)
-				qdel(C)
+				user.drop_item(C)
+				del(C)
 				set_lightfloor_state(0) //fixing it by bashing it with a light bulb, fun eh?
 				update_icon()
-				user << "<span class='notice'>You replace the light bulb.</span>"
+				user << "\blue You replace the light bulb."
 			else
-				user << "<span class='notice'>The lightbulb seems fine, no need to replace it.</span>"
+				user << "\blue The lightbulb seems fine, no need to replace it."
 
 	if(istype(C, /obj/item/weapon/crowbar) && (!(is_plating())))
 		if(broken || burnt)
-			user << "<span class='notice'>You remove the broken plating.</span>"
+			user << "\red You remove the broken plating."
 		else
 			if(is_wood_floor())
-				user << "<span class='danger'>You forcefully pry off the planks, destroying them in the process.</span>"
+				user << "\red You forcefully pry off the planks, destroying them in the process."
 			else
 				var/obj/item/I = new floor_type(src)
 				if(is_light_floor())
 					var/obj/item/stack/tile/light/L = I
 					L.on = get_lightfloor_on()
 					L.state = get_lightfloor_state()
-				user << "<span class='notice'>You remove the [I.name].</span>"
+				user << "\red You remove the [I.name]."
 
 		make_plating()
 		playsound(src, 'sound/items/Crowbar.ogg', 80, 1)
@@ -488,7 +488,7 @@ turf/simulated/floor/proc/update_icon()
 			return
 		else
 			if(is_wood_floor())
-				user << "<span class='notice'>You unscrew the planks.<span>"
+				user << "\red You unscrew the planks."
 				new floor_type(src)
 
 		make_plating()
@@ -502,7 +502,7 @@ turf/simulated/floor/proc/update_icon()
 			if (R.get_amount() < 2)
 				user << "<span class='warning'>You need more rods.</span>"
 				return
-			user << "<span class='notice'>Reinforcing the floor...</span>"
+			user << "\blue Reinforcing the floor..."
 			if(do_after(user, 30) && is_plating())
 				if (R.use(2))
 					ChangeTurf(/turf/simulated/floor/engine)
@@ -510,7 +510,7 @@ turf/simulated/floor/proc/update_icon()
 				return
 			else
 		else
-			user << "<span class='warning'>You must remove the plating first.</span>"
+			user << "\red You must remove the plating first."
 		return
 
 	if(istype(C, /obj/item/stack/tile))
@@ -543,7 +543,7 @@ turf/simulated/floor/proc/update_icon()
 				levelupdate()
 				playsound(src, 'sound/weapons/Genhit.ogg', 50, 1)
 			else
-				user << "<span class='warning'>This section is too damaged to support a tile. Use a welder to fix the damage.</span>"
+				user << "\blue This section is too damaged to support a tile. Use a welder to fix the damage."
 
 
 	if(istype(C, /obj/item/stack/cable_coil))
@@ -551,29 +551,29 @@ turf/simulated/floor/proc/update_icon()
 			var/obj/item/stack/cable_coil/coil = C
 			coil.turf_place(src, user)
 		else
-			user << "<span class='warning'>You must remove the plating first.</span>"
+			user << "\red You must remove the plating first."
 
 	if(istype(C, /obj/item/weapon/shovel))
 		if(is_grass_floor())
 			new /obj/item/weapon/ore/glass(src)
 			new /obj/item/weapon/ore/glass(src) //Make some sand if you shovel grass
-			user << "<span class='notice'>You shovel the grass.</span>"
+			user << "\blue You shovel the grass."
 			make_plating()
 		else
-			user << "<span class='warning'>You cannot shovel this.</span>"
+			user << "\red You cannot shovel this."
 
 	if(istype(C, /obj/item/weapon/weldingtool))
 		var/obj/item/weapon/weldingtool/welder = C
 		if(welder.isOn() && (is_plating()))
 			if(broken || burnt)
 				if(welder.remove_fuel(0,user))
-					user << "<span class='notice'>You fix some dents on the broken plating.</span>"
+					user << "\red You fix some dents on the broken plating."
 					playsound(src, 'sound/items/Welder.ogg', 80, 1)
 					icon_state = "plating"
 					burnt = 0
 					broken = 0
 				else
-					user << "<span class='warning'>You need more welding fuel to complete this task.</span>"
+					user << "\blue You need more welding fuel to complete this task."
 
 #undef LIGHTFLOOR_ON_BIT
 

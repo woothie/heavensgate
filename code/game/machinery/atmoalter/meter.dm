@@ -69,10 +69,10 @@
 	var/t = "A gas flow meter. "
 	
 	if(get_dist(user, src) > 3 && !(istype(user, /mob/living/silicon/ai) || istype(user, /mob/dead)))
-		t += "<span class='warning'>You are too far away to read it.</span>"
+		t += "\blue <B>You are too far away to read it.</B>"
 	
 	else if(stat & (NOPOWER|BROKEN))
-		t += "<span class='warning'>The display is off.</span>"
+		t += "\red <B>The display is off.</B>"	
 	
 	else if(src.target)
 		var/datum/gas_mixture/environment = target.return_air()
@@ -97,14 +97,14 @@
 	if (!istype(W, /obj/item/weapon/wrench))
 		return ..()
 	playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
-	user << "<span class='notice'>You begin to unfasten \the [src]...</span>"
+	user << "\blue You begin to unfasten \the [src]..."
 	if (do_after(user, 40))
 		user.visible_message( \
-			"<span class='notice'>\The [user] unfastens \the [src].</span>", \
-			"<span class='notice'>You have unfastened \the [src].</span>", \
+			"[user] unfastens \the [src].", \
+			"\blue You have unfastened \the [src].", \
 			"You hear ratchet.")
 		new /obj/item/pipe_meter(src.loc)
-		qdel(src)
+		del(src)
 
 // TURF METER - REPORTS A TILE'S AIR CONTENTS
 

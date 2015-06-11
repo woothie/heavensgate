@@ -9,19 +9,12 @@
 		..()
 		name = "floor"
 
-/turf/simulated/floor/airless/lava
-	name = "lava"
-	icon_state = "lava"
-	lava = 1
-	light_range = 2
-	light_color = "#CC0000"
-
 /turf/simulated/floor/airless/ceiling
 	icon_state = "rockvault"
 
 /turf/simulated/floor/light
 	name = "Light floor"
-	light_range = 5
+	luminosity = 5
 	icon_state = "light_on"
 	floor_type = /obj/item/stack/tile/light
 
@@ -68,10 +61,10 @@
 	if(!user)
 		return
 	if(istype(C, /obj/item/weapon/wrench))
-		user << "<span class='notice'>Removing rods...</span>"
+		user << "\blue Removing rods..."
 		playsound(src, 'sound/items/Ratchet.ogg', 80, 1)
 		if(do_after(user, 30))
-			PoolOrNew(/obj/item/stack/rods, list(loc, 2))
+			new /obj/item/stack/rods(src, 2)
 			ChangeTurf(/turf/simulated/floor)
 			var/turf/simulated/floor/F = src
 			F.make_plating()
@@ -81,8 +74,6 @@
 	name = "engraved floor"
 	icon_state = "cult"
 
-/turf/simulated/floor/engine/cult/cultify()
-	return
 
 /turf/simulated/floor/engine/n20
 	New()
@@ -145,7 +136,7 @@
 	icon = 'icons/turf/floors.dmi'
 	icon_state = "plating"
 
-/turf/simulated/shuttle/plating/vox	//Skipjack plating
+/turf/simulated/shuttle/plating/vox	//Vox skipjack plating
 	oxygen = 0
 	nitrogen = MOLES_N2STANDARD + MOLES_O2STANDARD
 
@@ -153,15 +144,10 @@
 	name = "Brig floor"        // Also added it into the 2x3 brig area of the shuttle.
 	icon_state = "floor4"
 
-/turf/simulated/shuttle/floor4/vox	//skipjack floors
+/turf/simulated/shuttle/floor4/vox	//Vox skipjack floors
 	name = "skipjack floor"
 	oxygen = 0
 	nitrogen = MOLES_N2STANDARD + MOLES_O2STANDARD
-
-/turf/simulated/floor/snow
-	name = "Snow"
-	icon = 'icons/turf/snow.dmi'
-	icon_state = "snow"
 
 /turf/simulated/floor/beach
 	name = "Beach"
@@ -171,9 +157,6 @@
 	name = "Sand"
 	icon_state = "sand"
 
-/turf/simulated/floor/beach/sand/desert
-	icon_state = "desert"
-
 /turf/simulated/floor/beach/coastline
 	name = "Coastline"
 	icon = 'icons/misc/beach2.dmi'
@@ -182,9 +165,6 @@
 /turf/simulated/floor/beach/water
 	name = "Water"
 	icon_state = "water"
-
-/turf/simulated/floor/beach/water/ocean
-	icon_state = "seadeep"
 
 /turf/simulated/floor/beach/water/New()
 	..()

@@ -38,15 +38,42 @@
 		who << "<b>Remember, you are not bound to any AI, you are not required to listen to them.</b>"
 
 
-/mob/living/silicon/robot/lawsync()
+/mob/living/silicon/robot/proc/lawsync()
 	laws_sanity_check()
-	var/datum/ai_laws/master = connected_ai && lawupdate ? connected_ai.laws : null
+	var/datum/ai_laws/master = connected_ai ? connected_ai.laws : null
+	var/temp
 	if (master)
-		master.sync(src)
-	..()
+		laws.ion.len = master.ion.len
+		for (var/index = 1, index <= master.ion.len, index++)
+			temp = master.ion[index]
+			if (length(temp) > 0)
+				laws.ion[index] = temp
+
+		if (!is_special_character(src) || mind.original != src)
+			if(master.zeroth_borg) //If the AI has a defined law zero specifically for its borgs, give it that one, otherwise give it the same one. --NEO
+				temp = master.zeroth_borg
+			else
+				temp = master.zeroth
+			laws.zeroth = temp
+
+		laws.inherent.len = master.inherent.len
+		for (var/index = 1, index <= master.inherent.len, index++)
+			temp = master.inherent[index]
+			if (length(temp) > 0)
+				laws.inherent[index] = temp
+
+		laws.supplied.len = master.supplied.len
+		for (var/index = 1, index <= master.supplied.len, index++)
+			temp = master.supplied[index]
+			if (length(temp) > 0)
+				laws.supplied[index] = temp
 	return
 
-/mob/living/silicon/robot/proc/robot_checklaws()
+/mob/living/silicon/robot/proc/add_ion_law(var/law)
+	laws_sanity_check()
+	laws.add_ion_law(law)
+
+/mob/living/silicon/robot/proc/robot_checklaws() //Gives you a link-driven interface for deciding what laws the statelaws() proc will share with the crew. --NeoFite
 	set category = "Robot Commands"
 	set name = "State Laws"
-	subsystem_law_manager()
+	checklaws()

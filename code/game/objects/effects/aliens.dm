@@ -46,7 +46,7 @@
 	var/turf/T = get_turf(src)
 	T.thermal_conductivity = WALL_HEAT_TRANSFER_COEFFICIENT
 
-/obj/effect/alien/resin/Destroy()
+/obj/effect/alien/resin/Del()
 	var/turf/T = get_turf(src)
 	T.thermal_conductivity = initial(T.thermal_conductivity)
 	..()
@@ -54,7 +54,7 @@
 /obj/effect/alien/resin/proc/healthcheck()
 	if(health <=0)
 		density = 0
-		qdel(src)
+		del(src)
 	return
 
 /obj/effect/alien/resin/bullet_act(var/obj/item/projectile/Proj)
@@ -82,10 +82,15 @@
 	healthcheck()
 	return
 
+/obj/effect/alien/resin/meteorhit()
+	health-=50
+	healthcheck()
+	return
+
 /obj/effect/alien/resin/hitby(AM as mob|obj)
 	..()
 	for(var/mob/O in viewers(src, null))
-		O.show_message("<span class='danger'>[src] was hit by [AM].</span>", 1)
+		O.show_message("\red <B>[src] was hit by [AM].</B>", 1)
 	var/tforce = 0
 	if(ismob(AM))
 		tforce = 10
@@ -99,25 +104,25 @@
 
 /obj/effect/alien/resin/attack_hand()
 	if (HULK in usr.mutations)
-		usr << "<span class='notice'>You easily destroy the [name].</span>"
+		usr << "\blue You easily destroy the [name]."
 		for(var/mob/O in oviewers(src))
-			O.show_message("<span class='warning'>[usr] destroys the [name]!</span>", 1)
+			O.show_message("\red [usr] destroys the [name]!", 1)
 		health = 0
 	else
 
 		// Aliens can get straight through these.
 		if(istype(usr,/mob/living/carbon))
 			var/mob/living/carbon/M = usr
-			if(locate(/obj/item/organ/xenos/hivenode) in M.internal_organs)
+			if(locate(/datum/organ/internal/xenos/hivenode) in M.internal_organs)
 				for(var/mob/O in oviewers(src))
-					O.show_message("<span class='warning'>[usr] strokes the [name] and it melts away!</span>", 1)
+					O.show_message("\red [usr] strokes the [name] and it melts away!", 1)
 				health = 0
 				healthcheck()
 				return
 
-		usr << "<span class='notice'>You claw at the [name].</span>"
+		usr << "\blue You claw at the [name]."
 		for(var/mob/O in oviewers(src))
-			O.show_message("<span class='warning'>[usr] claws at the [name]!</span>", 1)
+			O.show_message("\red [usr] claws at the [name]!", 1)
 		health -= rand(5,10)
 	healthcheck()
 	return
@@ -159,7 +164,7 @@
 	name = "purple sac"
 	desc = "Weird purple octopus-like thing."
 	layer = 3
-	light_range = NODERANGE
+	luminosity = NODERANGE
 	var/node_range = NODERANGE
 
 /obj/effect/alien/weeds/node/New()
@@ -169,7 +174,7 @@
 /obj/effect/alien/weeds/New(pos, node)
 	..()
 	if(istype(loc, /turf/space))
-		qdel(src)
+		del(src)
 		return
 	linked_node = node
 	if(icon_state == "weeds")icon_state = pick("weeds", "weeds1", "weeds2")
@@ -185,7 +190,7 @@
 	if (locate(/obj/movable, U))
 		U = locate(/obj/movable, U)
 		if(U.density == 1)
-			qdel(src)
+			del(src)
 			return
 
 Alien plants should do something if theres a lot of poison
@@ -195,7 +200,7 @@ Alien plants should do something if theres a lot of poison
 		return
 */
 	if (istype(U, /turf/space))
-		qdel(src)
+		del(src)
 		return
 
 	if(!linked_node || (get_dist(linked_node, src) > linked_node.node_range) )
@@ -215,26 +220,26 @@ Alien plants should do something if theres a lot of poison
 				if(O.density)
 					continue direction_loop
 
-			PoolOrNew(/obj/effect/alien/weeds, T, linked_node)
+			new /obj/effect/alien/weeds(T, linked_node)
 
 
 /obj/effect/alien/weeds/ex_act(severity)
 	switch(severity)
 		if(1.0)
-			qdel(src)
+			del(src)
 		if(2.0)
 			if (prob(50))
-				qdel(src)
+				del(src)
 		if(3.0)
 			if (prob(5))
-				qdel(src)
+				del(src)
 	return
 
 /obj/effect/alien/weeds/attackby(var/obj/item/weapon/W, var/mob/user)
 	if(W.attack_verb.len)
-		visible_message("<span class='danger'>\The [src] have been [pick(W.attack_verb)] with \the [W][(user ? " by [user]." : ".")]</span>")
+		visible_message("\red <B>\The [src] have been [pick(W.attack_verb)] with \the [W][(user ? " by [user]." : ".")]")
 	else
-		visible_message("<span class='danger'>\The [src] have been attacked with \the [W][(user ? " by [user]." : ".")]</span>")
+		visible_message("\red <B>\The [src] have been attacked with \the [W][(user ? " by [user]." : ".")]")
 
 	var/damage = W.force / 4.0
 
@@ -250,7 +255,7 @@ Alien plants should do something if theres a lot of poison
 
 /obj/effect/alien/weeds/proc/healthcheck()
 	if(health <= 0)
-		qdel(src)
+		del(src)
 
 
 /obj/effect/alien/weeds/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
@@ -289,32 +294,32 @@ Alien plants should do something if theres a lot of poison
 
 /obj/effect/alien/acid/proc/tick()
 	if(!target)
-		qdel(src)
+		del(src)
 
 	ticks += 1
 
 	if(ticks >= target_strength)
 
 		for(var/mob/O in hearers(src, null))
-			O.show_message("<span class='alium'>[src.target] collapses under its own weight into a puddle of goop and undigested debris!</span>", 1)
+			O.show_message("\green <B>[src.target] collapses under its own weight into a puddle of goop and undigested debris!</B>", 1)
 
 		if(istype(target, /turf/simulated/wall)) // I hate turf code.
 			var/turf/simulated/wall/W = target
 			W.dismantle_wall(1)
 		else
-			qdel(target)
-		qdel(src)
+			del(target)
+		del(src)
 		return
 
 	switch(target_strength - ticks)
 		if(6)
-			visible_message("<span class='alium'>[src.target] is holding up against the acid!</span>")
+			visible_message("\green <B>[src.target] is holding up against the acid!</B>")
 		if(4)
-			visible_message("<span class='alium'>[src.target]\s structure is being melted by the acid!</span>")
+			visible_message("\green <B>[src.target]\s structure is being melted by the acid!</B>")
 		if(2)
-			visible_message("<span class='alium'>[src.target] is struggling to withstand the acid!</span>")
+			visible_message("\green <B>[src.target] is struggling to withstand the acid!</B>")
 		if(0 to 1)
-			visible_message("<span class='alium'>[src.target] begins to crumble under the acid!</span>")
+			visible_message("\green <B>[src.target] begins to crumble under the acid!</B>")
 	spawn(rand(150, 200)) tick()
 
 /*
@@ -345,24 +350,24 @@ Alien plants should do something if theres a lot of poison
 		spawn(rand(MIN_GROWTH_TIME,MAX_GROWTH_TIME))
 			Grow()
 	else
-		qdel(src)
+		del(src)
 
 /obj/effect/alien/egg/attack_hand(user as mob)
 
 	var/mob/living/carbon/M = user
-	if(!istype(M) || !(locate(/obj/item/organ/xenos/hivenode) in M.internal_organs))
+	if(!istype(M) || !(locate(/datum/organ/internal/xenos/hivenode) in M.internal_organs))
 		return attack_hand(user)
 
 	switch(status)
 		if(BURST)
-			user << "<span class='warning'>You clear the hatched egg.</span>"
-			qdel(src)
+			user << "\red You clear the hatched egg."
+			del(src)
 			return
 		if(GROWING)
-			user << "<span class='warning'>The child is not developed yet.</span>"
+			user << "\red The child is not developed yet."
 			return
 		if(GROWN)
-			user << "<span class='warning'>You retrieve the child.</span>"
+			user << "\red You retrieve the child."
 			Burst(0)
 			return
 
@@ -404,9 +409,9 @@ Alien plants should do something if theres a lot of poison
 	if(health <= 0)
 		return
 	if(W.attack_verb.len)
-		src.visible_message("<span class='danger'>\The [src] has been [pick(W.attack_verb)] with \the [W][(user ? " by [user]." : ".")]</span>")
+		src.visible_message("\red <B>\The [src] has been [pick(W.attack_verb)] with \the [W][(user ? " by [user]." : ".")]")
 	else
-		src.visible_message("<span class='danger'>\The [src] has been attacked with \the [W][(user ? " by [user]." : ".")]</span>")
+		src.visible_message("\red <B>\The [src] has been attacked with \the [W][(user ? " by [user]." : ".")]")
 	var/damage = W.force / 4.0
 
 	if(istype(W, /obj/item/weapon/weldingtool))

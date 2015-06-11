@@ -23,7 +23,7 @@
 
 	var/turf/T = P.loc
 	if (P.level < 2 && T.level==1 && isturf(T) && T.intact)
-		user << "<span class='warning'>You must remove the plating first.</span>"
+		user << "\red You must remove the plating first."
 		return
 
 	P.change_color(pipe_colors[mode])

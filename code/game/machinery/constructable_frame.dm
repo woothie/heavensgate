@@ -18,15 +18,22 @@
 	proc/update_desc()
 		var/D
 		if(req_components)
-			var/list/component_list = new
+			D = "Requires "
+			var/first = 1
 			for(var/I in req_components)
 				if(req_components[I] > 0)
-					component_list += "[num2text(req_components[I])] [req_component_names[I]]"
-			D = "Requires [english_list(component_list)]."
+					D += "[first?"":", "][num2text(req_components[I])] [req_component_names[I]]"
+					first = 0
+			if(first) // nothing needs to be added, then
+				D += "nothing"
+			D += "."
 		desc = D
 
 /obj/machinery/constructable_frame/machine_frame
 	attackby(obj/item/P as obj, mob/user as mob)
+		if(P.crit_fail)
+			user << "\red This part is faulty, you cannot add this to the machine!"
+			return
 		switch(state)
 			if(1)
 				if(istype(P, /obj/item/stack/cable_coil))
@@ -44,15 +51,15 @@
 				else
 					if(istype(P, /obj/item/weapon/wrench))
 						playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
-						user << "<span class='notice'>You dismantle the frame</span>"
-						new /obj/item/stack/material/steel(src.loc, 5)
-						qdel(src)
+						user << "\blue You dismantle the frame"
+						new /obj/item/stack/sheet/metal(src.loc, 5)
+						del(src)
 			if(2)
 				if(istype(P, /obj/item/weapon/circuitboard))
 					var/obj/item/weapon/circuitboard/B = P
 					if(B.board_type == "machine")
 						playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
-						user << "<span class='notice'>You add the circuit board to the frame.</span>"
+						user << "\blue You add the circuit board to the frame."
 						circuit = P
 						user.drop_item()
 						P.loc = src
@@ -67,14 +74,17 @@
 							var/cp = text2path(A)
 							var/obj/ct = new cp() // have to quickly instantiate it get name
 							req_component_names[A] = ct.name
-						update_desc()
+						if(circuit.frame_desc)
+							desc = circuit.frame_desc
+						else
+							update_desc()
 						user << desc
 					else
-						user << "<span class='warning'>This frame does not accept circuit boards of this type!</span>"
+						user << "\red This frame does not accept circuit boards of this type!"
 				else
 					if(istype(P, /obj/item/weapon/wirecutters))
 						playsound(src.loc, 'sound/items/Wirecutter.ogg', 50, 1)
-						user << "<span class='notice'>You remove the cables.</span>"
+						user << "\blue You remove the cables."
 						state = 1
 						icon_state = "box_0"
 						var/obj/item/stack/cable_coil/A = new /obj/item/stack/cable_coil( src.loc )
@@ -87,9 +97,9 @@
 					circuit.loc = src.loc
 					circuit = null
 					if(components.len == 0)
-						user << "<span class='notice'>You remove the circuit board.</span>"
+						user << "\blue You remove the circuit board."
 					else
-						user << "<span class='notice'>You remove the circuit board and other components.</span>"
+						user << "\blue You remove the circuit board and other components."
 						for(var/obj/item/weapon/W in components)
 							W.loc = src.loc
 					desc = initial(desc)
@@ -119,7 +129,7 @@
 							else
 								circuit.loc = null
 							new_machine.RefreshParts()
-							qdel(src)
+							del(src)
 					else
 						if(istype(P, /obj/item))
 							for(var/I in req_components)
@@ -145,4 +155,4 @@
 									break
 							user << desc
 							if(P && P.loc != src && !istype(P, /obj/item/stack/cable_coil))
-								user << "<span class='warning'>You cannot add that component to the machine!</span>"
+								user << "\red You cannot add that component to the machine!"

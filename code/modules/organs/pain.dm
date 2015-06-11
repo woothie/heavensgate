@@ -8,11 +8,14 @@ mob/var/next_pain_time = 0
 // partname is the name of a body part
 // amount is a num from 1 to 100
 mob/living/carbon/proc/pain(var/partname, var/amount, var/force, var/burning = 0)
-	if(stat >= 1) 
+	if(stat >= 2) return
+	if(reagents.has_reagent("paracetamol"))
 		return
-	if(species && (species.flags & NO_PAIN))
+	if(reagents.has_reagent("tramadol"))
 		return
-	if(analgesic > 40)
+	if(reagents.has_reagent("oxycodone"))
+		return
+	if(analgesic)
 		return
 	if(world.time < next_pain_time && !force)
 		return
@@ -51,10 +54,10 @@ mob/living/carbon/proc/pain(var/partname, var/amount, var/force, var/burning = 0
 // message is the custom message to be displayed
 // flash_strength is 0 for weak pain flash, 1 for strong pain flash
 mob/living/carbon/human/proc/custom_pain(var/message, var/flash_strength)
-	if(stat >= 1) 
-		return
-	if(species.flags & NO_PAIN) 
-		return
+	if(stat >= 1) return
+
+	if(species && species.flags & NO_PAIN) return
+
 	if(reagents.has_reagent("tramadol"))
 		return
 	if(reagents.has_reagent("oxycodone"))
@@ -74,15 +77,21 @@ mob/living/carbon/human/proc/custom_pain(var/message, var/flash_strength)
 mob/living/carbon/human/proc/handle_pain()
 	// not when sleeping
 
-	if(species.flags & NO_PAIN) return
+	if(species && species.flags & NO_PAIN) return
 
 	if(stat >= 2) return
-	if(analgesic > 70)
+	if(reagents.has_reagent("tramadol"))
+		return
+	if(reagents.has_reagent("oxycodone"))
+		return
+	if(analgesic)
 		return
 	var/maxdam = 0
-	var/obj/item/organ/external/damaged_organ = null
-	for(var/obj/item/organ/external/E in organs)
-		if(E.status & (ORGAN_DEAD|ORGAN_ROBOT)) continue
+	var/datum/organ/external/damaged_organ = null
+	for(var/datum/organ/external/E in organs)
+		// amputated limbs don't cause pain
+		if(E.amputated) continue
+		if(E.status & ORGAN_DEAD) continue
 		var/dam = E.get_damage()
 		// make the choice of the organ depend on damage,
 		// but also sometimes use one of the less damaged ones
@@ -90,14 +99,13 @@ mob/living/carbon/human/proc/handle_pain()
 			damaged_organ = E
 			maxdam = dam
 	if(damaged_organ)
-		pain(damaged_organ.name, maxdam, 0)
+		pain(damaged_organ.display_name, maxdam, 0)
 
 	// Damage to internal organs hurts a lot.
-	for(var/obj/item/organ/I in internal_organs)
-		if(I.status & (ORGAN_DEAD|ORGAN_ROBOT)) continue
+	for(var/datum/organ/internal/I in internal_organs)
 		if(I.damage > 2) if(prob(2))
-			var/obj/item/organ/external/parent = get_organ(I.parent_organ)
-			src.custom_pain("You feel a sharp pain in your [parent.name]", 1)
+			var/datum/organ/external/parent = get_organ(I.parent_organ)
+			src.custom_pain("You feel a sharp pain in your [parent.display_name]", 1)
 
 	var/toxDamageMessage = null
 	var/toxMessageProb = 1

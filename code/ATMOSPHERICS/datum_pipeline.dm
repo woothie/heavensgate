@@ -9,13 +9,13 @@ datum/pipeline
 
 	var/alert_pressure = 0
 
-	Destroy()
+	Del()
 		if(network)
-			qdel(network)
+			del(network)
 
 		if(air && air.volume)
 			temporarily_store_air()
-			qdel(air)
+			del(air)
 
 		..()
 

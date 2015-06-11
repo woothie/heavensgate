@@ -16,7 +16,7 @@
 			recipe.resources = list()
 			for(var/material in I.matter)
 				recipe.resources[material] = I.matter[material]*1.25 // More expensive to produce than they are to recycle.
-			qdel(I)
+			del(I)
 
 /datum/autolathe/recipe
 	var/name = "object"
@@ -40,11 +40,6 @@
 /datum/autolathe/recipe/extinguisher
 	name = "extinguisher"
 	path = /obj/item/weapon/extinguisher
-	category = "General"
-
-/datum/autolathe/recipe/jar
-	name = "jar"
-	path = /obj/item/glass_jar
 	category = "General"
 
 /datum/autolathe/recipe/crowbar
@@ -82,16 +77,6 @@
 	path = /obj/item/weapon/wrench
 	category = "Tools"
 
-/datum/autolathe/recipe/hatchet
-	name = "hatchet"
-	path = /obj/item/weapon/material/hatchet
-	category = "Tools"
-
-/datum/autolathe/recipe/minihoe
-	name = "mini hoe"
-	path = /obj/item/weapon/material/minihoe
-	category = "Tools"
-
 /datum/autolathe/recipe/radio_headset
 	name = "radio headset"
 	path = /obj/item/device/radio/headset
@@ -109,19 +94,19 @@
 
 /datum/autolathe/recipe/metal
 	name = "steel sheets"
-	path = /obj/item/stack/material/steel
+	path = /obj/item/stack/sheet/metal
 	category = "General"
 	is_stack = 1
 
 /datum/autolathe/recipe/glass
 	name = "glass sheets"
-	path = /obj/item/stack/material/glass
+	path = /obj/item/stack/sheet/glass
 	category = "General"
 	is_stack = 1
 
 /datum/autolathe/recipe/rglass
 	name = "reinforced glass sheets"
-	path = /obj/item/stack/material/glass/reinforced
+	path = /obj/item/stack/sheet/glass/reinforced
 	category = "General"
 	is_stack = 1
 
@@ -133,7 +118,7 @@
 
 /datum/autolathe/recipe/knife
 	name = "kitchen knife"
-	path = /obj/item/weapon/material/knife
+	path = /obj/item/weapon/kitchenknife
 	category = "General"
 
 /datum/autolathe/recipe/taperecorder
@@ -293,7 +278,7 @@
 
 /datum/autolathe/recipe/ashtray_glass
 	name = "glass ashtray"
-	path = /obj/item/weapon/material/ashtray/glass
+	path = /obj/item/ashtray/glass
 	category = "General"
 
 /datum/autolathe/recipe/camera_assembly
@@ -367,12 +352,6 @@
 	hidden = 1
 	category = "Arms and Ammunition"
 
-/datum/autolathe/recipe/tacknife
-	name = "tactical knife"
-	path = /obj/item/weapon/material/hatchet/tacknife
-	hidden = 1
-	category = "Arms and Ammunition"
-
 /datum/autolathe/recipe/stunshell
 	name = "ammunition (stun cartridge, shotgun)"
 	path = /obj/item/ammo_casing/shotgun/stunshell
@@ -402,5 +381,3 @@
 	path = /obj/item/weapon/handcuffs
 	hidden = 1
 	category = "General"
-
-

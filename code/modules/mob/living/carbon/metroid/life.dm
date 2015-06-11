@@ -82,18 +82,8 @@
 	return temp_change
 
 /mob/living/carbon/slime/proc/handle_chemicals_in_body()
-	chem_effects.Cut()
-	analgesic = 0
 
-	if(touching)
-		touching.metabolize(0, CHEM_TOUCH)
-	if(ingested)
-		ingested.metabolize(0, CHEM_INGEST)
-	if(reagents)
-		reagents.metabolize(0, CHEM_BLOOD)
-
-	if(CE_PAINKILLER in chem_effects)
-		analgesic = chem_effects[CE_PAINKILLER]
+	if(reagents) reagents.metabolize(src)
 
 	src.updatehealth()
 
@@ -258,7 +248,7 @@
 							Target = C
 							break
 
-						if(isalien(C) || issmall(C) || isanimal(C))
+						if(isalien(C) || ismonkey(C) || isanimal(C))
 							Target = C
 							break
 
@@ -314,7 +304,7 @@
 		if(Target.Adjacent(src))
 			if(istype(Target, /mob/living/silicon)) // Glomp the silicons
 				if(!Atkcool)
-					a_intent = I_HURT
+					a_intent = "hurt"
 					UnarmedAttack(Target)
 					Atkcool = 1
 					spawn(45)
@@ -328,12 +318,12 @@
 					spawn(45)
 						Atkcool = 0
 
-					a_intent = I_DISARM
+					a_intent = "disarm"
 					UnarmedAttack(Target)
 
 			else
 				if(!Atkcool)
-					a_intent = I_GRAB
+					a_intent = "grab"
 					UnarmedAttack(Target)
 
 		else if(Target in view(7, src))
@@ -351,9 +341,9 @@
 				frenemy = S
 		if (frenemy && prob(1))
 			if (frenemy.colour == colour)
-				a_intent = I_HELP
+				a_intent = "help"
 			else
-				a_intent = I_HURT
+				a_intent = "hurt"
 			UnarmedAttack(frenemy)
 
 	var/sleeptime = movement_delay()
@@ -365,10 +355,10 @@
 /mob/living/carbon/slime/proc/handle_speech_and_mood()
 	//Mood starts here
 	var/newmood = ""
-	a_intent = I_HELP
+	a_intent = "help"
 	if (rabid || attacked)
 		newmood = "angry"
-		a_intent = I_HURT
+		a_intent = "hurt"
 	else if (Target) newmood = "mischevous"
 
 	if (!newmood)

@@ -55,9 +55,8 @@
 			ui.push_data(data)
 			return ui
 		else
-			ui.reinitialise(new_initial_data=data)
-			return ui
-
+			//testing("nanomanager/try_update_ui mob [user.name] [src_object:name] [ui_key] [force_open] - forcing opening of ui")
+			ui.close()
 	return null
 
  /**
@@ -165,10 +164,10 @@
 	else if (isnull(open_uis[src_object_key][ui.ui_key]) || !istype(open_uis[src_object_key][ui.ui_key], /list))
 		open_uis[src_object_key][ui.ui_key] = list();
 
-	ui.user.open_uis |= ui
+	ui.user.open_uis.Add(ui)
 	var/list/uis = open_uis[src_object_key][ui.ui_key]
-	uis |= ui
-	processing_uis |= ui
+	uis.Add(ui)
+	processing_uis.Add(ui)
 	//testing("nanomanager/ui_opened mob [ui.user.name] [ui.src_object:name] [ui.ui_key] - user.open_uis [ui.user.open_uis.len] | uis [uis.len] | processing_uis [processing_uis.len]")
 
  /**

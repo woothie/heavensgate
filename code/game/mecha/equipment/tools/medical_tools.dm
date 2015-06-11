@@ -3,10 +3,11 @@
 	desc = "A sleeper. Mountable to an exosuit. (Can be attached to: Medical Exosuits)"
 	icon = 'icons/obj/Cryogenic2.dmi'
 	icon_state = "sleeper_0"
-	origin_tech = list(TECH_DATA = 2, TECH_BIO = 3)
+	origin_tech = "programming=2;biotech=3"
 	energy_drain = 20
 	range = MELEE
-	construction_cost = list(DEFAULT_WALL_MATERIAL=5000,"glass"=10000)
+	construction_cost = list("metal"=5000,"glass"=10000)
+	reliability = 1000
 	equip_cooldown = 20
 	var/mob/living/carbon/occupant = null
 	var/datum/global_iterator/pr_mech_sleeper
@@ -19,10 +20,6 @@
 		pr_mech_sleeper = new /datum/global_iterator/mech_sleeper(list(src),0)
 		pr_mech_sleeper.set_delay(equip_cooldown)
 		return
-
-	Destroy()
-		qdel(pr_mech_sleeper)
-		..()
 
 	allow_drop()
 		return 0
@@ -391,9 +388,9 @@
 	var/datum/global_iterator/mech_synth/synth
 	range = MELEE|RANGED
 	equip_cooldown = 10
-	origin_tech = list(TECH_MATERIAL = 3, TECH_BIO = 4, TECH_MAGNET = 4, TECH_DATA = 3)
+	origin_tech = "materials=3;biotech=4;magnets=4;programming=3"
 	construction_time = 200
-	construction_cost = list(DEFAULT_WALL_MATERIAL=3000,"glass"=2000)
+	construction_cost = list("metal"=3000,"glass"=2000)
 	required_type = /obj/mecha/medical
 
 	New()
@@ -442,7 +439,7 @@
 		var/turf/trg = get_turf(target)
 		var/obj/item/weapon/reagent_containers/syringe/S = syringes[1]
 		S.forceMove(get_turf(chassis))
-		reagents.trans_to_obj(S, min(S.volume, reagents.total_volume))
+		reagents.trans_to(S, min(S.volume, reagents.total_volume))
 		syringes -= S
 		S.icon = 'icons/obj/chemical.dmi'
 		S.icon_state = "syringeproj"
@@ -461,7 +458,7 @@
 					if(M)
 						S.icon_state = initial(S.icon_state)
 						S.icon = initial(S.icon)
-						S.reagents.trans_to_mob(M, S.reagents.total_volume, CHEM_BLOOD)
+						S.reagents.trans_to(M, S.reagents.total_volume)
 						M.take_organ_damage(2)
 						S.visible_message("<span class=\"attack\"> [M] was hit by the syringe!</span>")
 						break
@@ -590,7 +587,7 @@
 				if(!(D.CanPass(S,src.loc)))
 					occupant_message("Unable to load syringe.")
 					return 0
-			S.reagents.trans_to_obj(src, S.reagents.total_volume)
+			S.reagents.trans_to(src, S.reagents.total_volume)
 			S.forceMove(src)
 			syringes += S
 			occupant_message("Syringe loaded.")
@@ -647,6 +644,8 @@
 			S.occupant_message("<span class=\"alert\">Reagent processing stopped.</a>")
 			S.log_message("Reagent processing stopped.")
 			return stop()
+		if(anyprob(S.reliability))
+			S.critfail()
 		var/amount = S.synth_speed / S.processed_reagents.len
 		for(var/reagent in S.processed_reagents)
 			S.reagents.add_reagent(reagent,amount)

@@ -37,7 +37,7 @@ var/const/HOLOPAD_MODE = RANGE_BASED
 	icon_state = "holopad0"
 
 	layer = TURF_LAYER+0.1 //Preventing mice and drones from sneaking under them.
-
+	
 	var/power_per_hologram = 500 //per usage per hologram
 	idle_power_usage = 5
 	use_power = 1
@@ -113,12 +113,6 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 			master.show_message(rendered, 2)
 	return
 
-/obj/machinery/hologram/holopad/show_message(msg, type, alt, alt_type)
-	for(var/mob/living/silicon/ai/master in masters)
-		var/rendered = "<i><span class='game say'>Holopad received, <span class='message'>[msg]</span></span></i>"
-		master.show_message(rendered, type)
-	return
-
 /obj/machinery/hologram/holopad/proc/create_holo(mob/living/silicon/ai/A, turf/T = loc)
 	var/obj/effect/overlay/hologram = new(T)//Spawn a blank effect at the location.
 	hologram.icon = A.holo_icon
@@ -126,10 +120,10 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 	hologram.layer = FLY_LAYER//Above all the other objects/mobs. Or the vast majority of them.
 	hologram.anchored = 1//So space wind cannot drag it.
 	hologram.name = "[A.name] (Hologram)"//If someone decides to right click.
-	hologram.set_light(2)	//hologram lighting
+	hologram.SetLuminosity(2)	//hologram lighting
 	hologram.color = color //painted holopad gives coloured holograms
 	masters[A] = hologram
-	set_light(2)			//pad lighting
+	SetLuminosity(2)			//pad lighting
 	icon_state = "holopad1"
 	A.holo = src
 	return 1
@@ -137,10 +131,10 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 /obj/machinery/hologram/holopad/proc/clear_holo(mob/living/silicon/ai/user)
 	if(user.holo == src)
 		user.holo = null
-	qdel(masters[user])//Get rid of user's hologram
+	del(masters[user])//Get rid of user's hologram //qdel
 	masters -= user //Discard AI from the list of those who use holopad
 	if (!masters.len)//If no users left
-		set_light(0)			//pad lighting (hologram lighting will be handled automatically since its owner was deleted)
+		SetLuminosity(0)			//pad lighting (hologram lighting will be handled automatically since its owner was deleted)
 		icon_state = "holopad0"
 	return 1
 
@@ -150,15 +144,16 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 		if((stat & NOPOWER) || !active_ai)
 			clear_holo(master)
 			continue
-
+		
 		if((HOLOPAD_MODE == RANGE_BASED && (get_dist(master.eyeobj, src) > holo_range)))
 			clear_holo(master)
 			continue
-
+		
 		if(HOLOPAD_MODE == AREA_BASED)
 			var/area/holo_area = get_area(src)
 			var/area/eye_area = get_area(master.eyeobj)
-			if(eye_area != holo_area)
+			
+			if(!(eye_area in holo_area.master.related))
 				clear_holo(master)
 				continue
 
@@ -187,20 +182,24 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 /obj/machinery/hologram/ex_act(severity)
 	switch(severity)
 		if(1.0)
-			qdel(src)
+			del(src)
 		if(2.0)
 			if (prob(50))
-				qdel(src)
+				del(src)
 		if(3.0)
 			if (prob(5))
-				qdel(src)
+				del(src)
 	return
 
 /obj/machinery/hologram/blob_act()
-	qdel(src)
+	del(src)
 	return
 
-/obj/machinery/hologram/holopad/Destroy()
+/obj/machinery/hologram/meteorhit()
+	del(src)
+	return
+
+/obj/machinery/hologram/holopad/Del()
 	for (var/mob/living/silicon/ai/master in masters)
 		clear_holo(master)
 	..()

@@ -6,7 +6,8 @@
 	name = T_BOARD("hull shield generator")
 	board_type = "machine"
 	build_path = "/obj/machinery/shield_gen/external"
-	origin_tech = list(TECH_BLUESPACE = 4, TECH_PHORON = 3)
+	origin_tech = "bluespace=4;phorontech=3"
+	frame_desc = "Requires 2 Pico Manipulators, 1 Subspace Transmitter, 5 Pieces of cable, 1 Subspace Crystal, 1 Subspace Amplifier and 1 Console Screen."
 	req_components = list(
 							"/obj/item/weapon/stock_parts/manipulator/pico" = 2,
 							"/obj/item/weapon/stock_parts/subspace/transmitter" = 1,
@@ -19,7 +20,8 @@
 	name = T_BOARD("bubble shield generator")
 	board_type = "machine"
 	build_path = "/obj/machinery/shield_gen"
-	origin_tech = list(TECH_BLUESPACE = 4, TECH_PHORON = 3)
+	origin_tech = "bluespace=4;phorontech=3"
+	frame_desc = "Requires 2 Pico Manipulators, 1 Subspace Transmitter, 5 Pieces of cable, 1 Subspace Crystal, 1 Subspace Amplifier and 1 Console Screen."
 	req_components = list(
 							"/obj/item/weapon/stock_parts/manipulator/pico" = 2,
 							"/obj/item/weapon/stock_parts/subspace/transmitter" = 1,
@@ -32,7 +34,8 @@
 	name = T_BOARD("shield capacitor")
 	board_type = "machine"
 	build_path = "/obj/machinery/shield_capacitor"
-	origin_tech = list(TECH_MAGNET = 3, TECH_POWER = 4)
+	origin_tech = "magnets=3;powerstorage=4"
+	frame_desc = "Requires 2 Pico Manipulators, 1 Subspace Filter, 5 Pieces of cable, 1 Subspace Treatment disk, 1 Subspace Analyzer and 1 Console Screen."
 	req_components = list(
 							"/obj/item/weapon/stock_parts/manipulator/pico" = 2,
 							"/obj/item/weapon/stock_parts/subspace/filter" = 1,

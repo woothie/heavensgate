@@ -1,14 +1,3 @@
-
-/*
-	The initialization of the game happens roughly like this:
-
-	1. All global variables are initialized (including the global_init instance).
-	2. The map is initialized, and map objects are created.
-	3. world/New() runs, creating the process scheduler (and the old master controller) and spawning their setup.
-	4. processScheduler/setup() runs, creating all the processes. game_controller/setup() runs, calling initialize() on all movable atoms in the world.
-	5. The gameticker is created.
-
-*/
 var/global/datum/global_init/init = new ()
 
 /*
@@ -19,10 +8,7 @@ var/global/datum/global_init/init = new ()
 	makeDatumRefLists()
 	load_configuration()
 
-	initialize_chemical_reagents()
-	initialize_chemical_reactions()
-
-	qdel(src) //we're done
+	del(src)
 
 
 /world
@@ -66,47 +52,38 @@ var/global/datum/global_init/init = new ()
 
 	sleep_offline = 1
 
-	// Set up roundstart seed list.
+	// Set up roundstart seed list. This is here because vendors were
+	// bugging out and not populating with the correct packet names
+	// due to this list not being instantiated.
 	plant_controller = new()
-
-	// This is kinda important. Set up details of what the hell things are made of.
-	populate_material_list()
-
-	if(config.generate_asteroid)
-		// These values determine the specific area that the map is applied to.
-		// If you do not use the official Baycode moonbase map, you will need to change them.
-		//Create the mining Z-level.
-		new /datum/random_map/automata/cave_system(null,1,1,5,255,255)
-		//new /datum/random_map/noise/volcanism(null,1,1,5,255,255) // Not done yet! Pretty, though.
-		// Create the mining ore distribution map.
-		new /datum/random_map/noise/ore(null, 1, 1, 5, 64, 64)
-		// Update all turfs to ensure everything looks good post-generation. Yes,
-		// it's brute-forcey, but frankly the alternative is a mine turf rewrite.
-		for(var/turf/simulated/mineral/M in world) // Ugh.
-			M.updateMineralOverlays()
-		for(var/turf/simulated/floor/plating/airless/asteroid/M in world) // Uuuuuugh.
-			M.updateMineralOverlays()
 
 	// Create autolathe recipes, as above.
 	populate_lathe_recipes()
 
-	// Create robolimbs for chargen.
-	populate_robolimb_list()
-
-	processScheduler = new
 	master_controller = new /datum/controller/game_controller()
 	spawn(1)
-		processScheduler.deferSetupFor(/datum/controller/process/ticker)
-		processScheduler.setup()
 		master_controller.setup()
 
 	spawn(3000)		//so we aren't adding to the round-start lag
 		if(config.ToRban)
 			ToRban_autoupdate()
+		if(config.kick_inactive)
+			KickInactiveClients()
 
 #undef RECOMMENDED_VERSION
 
 	return
+
+//world/Topic(href, href_list[])
+//		world << "Received a Topic() call!"
+//		world << "[href]"
+//		for(var/a in href_list)
+//			world << "[a]"
+//		if(href_list["hello"])
+//			world << "Hello world!"
+//			return "Hello world!"
+//		world << "End of Topic() call."
+//		..()
 
 var/world_topic_spam_protect_ip = "0.0.0.0"
 var/world_topic_spam_protect_time = world.timeofday
@@ -232,14 +209,27 @@ var/world_topic_spam_protect_time = world.timeofday
 	/*spawn(0)
 		world << sound(pick('sound/AI/newroundsexy.ogg','sound/misc/apcdestroyed.ogg','sound/misc/bangindonk.ogg')) // random end sounds!! - LastyBatsy
 		*/
-
-	processScheduler.stop()
-
 	for(var/client/C in clients)
 		if(config.server)	//if you set a server location in config.txt, it sends you there instead of trying to reconnect to the same world address. -- NeoFite
 			C << link("byond://[config.server]")
 
 	..(reason)
+
+
+#define INACTIVITY_KICK	6000	//10 minutes in ticks (approx.)
+/world/proc/KickInactiveClients()
+	spawn(-1)
+		set background = 1
+		while(1)
+			sleep(INACTIVITY_KICK)
+			for(var/client/C in clients)
+				if(C.is_afk(INACTIVITY_KICK))
+					if(!istype(C.mob, /mob/dead))
+						log_access("AFK: [key_name(C)]")
+						C << "\red You have been inactive for more than 10 minutes and have been disconnected."
+						del(C)
+#undef INACTIVITY_KICK
+
 
 /hook/startup/proc/loadMode()
 	world.load_mode()
@@ -342,8 +332,13 @@ var/world_topic_spam_protect_time = world.timeofday
 	else if (n > 0)
 		features += "~[n] player"
 
+	/*
+	is there a reason for this? the byond site shows 'hosted by X' when there is a proper host already.
+	if (host)
+		features += "hosted by <b>[host]</b>"
+	*/
 
-	if (config && config.hostedby)
+	if (!host && config && config.hostedby)
 		features += "hosted by <b>[config.hostedby]</b>"
 
 	if (features)

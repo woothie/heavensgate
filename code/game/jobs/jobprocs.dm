@@ -44,7 +44,7 @@
 	timeleft -= (world.time - last_process)
 	if(timeleft <= 0)
 		processing_objects.Remove(src)
-		qdel(src)
+		del(src)
 
 ///////////////////////////////
 

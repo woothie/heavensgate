@@ -60,7 +60,7 @@
 
 	return null
 
-/obj/machinery/atmospherics/portables_connector/Destroy()
+/obj/machinery/atmospherics/portables_connector/Del()
 	loc = null
 
 	if(connected_device)
@@ -68,7 +68,7 @@
 
 	if(node)
 		node.disconnect(src)
-		qdel(network)
+		del(network)
 
 	node = null
 
@@ -122,7 +122,7 @@
 
 /obj/machinery/atmospherics/portables_connector/disconnect(obj/machinery/atmospherics/reference)
 	if(reference==node)
-		qdel(network)
+		del(network)
 		node = null
 
 	update_underlays()
@@ -134,22 +134,22 @@
 	if (!istype(W, /obj/item/weapon/wrench))
 		return ..()
 	if (connected_device)
-		user << "<span class='warning'>You cannot unwrench \the [src], dettach \the [connected_device] first.</span>"
+		user << "\red You cannot unwrench this [src], dettach [connected_device] first."
 		return 1
 	if (locate(/obj/machinery/portable_atmospherics, src.loc))
 		return 1
 	var/datum/gas_mixture/int_air = return_air()
 	var/datum/gas_mixture/env_air = loc.return_air()
 	if ((int_air.return_pressure()-env_air.return_pressure()) > 2*ONE_ATMOSPHERE)
-		user << "<span class='warning'>You cannot unwrench \the [src], it too exerted due to internal pressure.</span>"
+		user << "\red You cannot unwrench this [src], it too exerted due to internal pressure."
 		add_fingerprint(user)
 		return 1
 	playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
-	user << "<span class='notice'>You begin to unfasten \the [src]...</span>"
+	user << "\blue You begin to unfasten \the [src]..."
 	if (do_after(user, 40))
 		user.visible_message( \
-			"<span class='notice'>\The [user] unfastens \the [src].</span>", \
-			"<span class='notice'>You have unfastened \the [src].</span>", \
-			"You hear a ratchet.")
+			"[user] unfastens \the [src].", \
+			"\blue You have unfastened \the [src].", \
+			"You hear ratchet.")
 		new /obj/item/pipe(loc, make_from=src)
-		qdel(src)
+		del(src)

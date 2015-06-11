@@ -173,7 +173,7 @@
 /obj/machinery/shower/update_icon()	//this is terribly unreadable, but basically it makes the shower mist up
 	overlays.Cut()					//once it's been on for a while, in addition to handling the water overlay.
 	if(mymist)
-		qdel(mymist)
+		del(mymist)
 
 	if(on)
 		overlays += image('icons/obj/watercloset.dmi', src, "water", MOB_LAYER + 1, dir)
@@ -183,16 +183,16 @@
 			spawn(50)
 				if(src && on)
 					ismist = 1
-					mymist = PoolOrNew(/obj/effect/mist,loc)
+					mymist = new /obj/effect/mist(loc)
 		else
 			ismist = 1
-			mymist = PoolOrNew(/obj/effect/mist,loc)
+			mymist = new /obj/effect/mist(loc)
 	else if(ismist)
 		ismist = 1
-		mymist = PoolOrNew(/obj/effect/mist,loc)
+		mymist = new /obj/effect/mist(loc)
 		spawn(250)
 			if(src && !on)
-				qdel(mymist)
+				del(mymist)
 				ismist = 0
 
 /obj/machinery/shower/Crossed(atom/movable/O)
@@ -292,7 +292,7 @@
 		loc.clean_blood()
 		for(var/obj/effect/E in tile)
 			if(istype(E,/obj/effect/rune) || istype(E,/obj/effect/decal/cleanable) || istype(E,/obj/effect/overlay))
-				qdel(E)
+				del(E)
 
 /obj/machinery/shower/process()
 	if(!on) return
@@ -346,13 +346,12 @@
 	var/busy = 0 	//Something's being washed at the moment
 
 /obj/structure/sink/attack_hand(mob/user as mob)
-	if (ishuman(user))
-		var/mob/living/carbon/human/H = user
-		var/obj/item/organ/external/temp = H.organs_by_name["r_hand"]
+	if (hasorgans(user))
+		var/datum/organ/external/temp = user:organs_by_name["r_hand"]
 		if (user.hand)
-			temp = H.organs_by_name["l_hand"]
+			temp = user:organs_by_name["l_hand"]
 		if(temp && !temp.is_usable())
-			user << "<span class='notice'>You try to move your [temp.name], but cannot!"
+			user << "<span class='notice'>You try to move your [temp.display_name], but cannot!"
 			return
 
 	if(isrobot(user) || isAI(user))
@@ -362,10 +361,10 @@
 		return
 
 	if(busy)
-		user << "<span class='warning'>Someone's already washing here.</span>"
+		user << "\red Someone's already washing here."
 		return
 
-	usr << "<span class='notice'>You start washing your hands.</span>"
+	usr << "\blue You start washing your hands."
 
 	busy = 1
 	sleep(40)
@@ -377,18 +376,18 @@
 	if(ishuman(user))
 		user:update_inv_gloves()
 	for(var/mob/V in viewers(src, null))
-		V.show_message("<span class='notice'>[user] washes their hands using \the [src].")
+		V.show_message("\blue [user] washes their hands using \the [src].")
 
 
 /obj/structure/sink/attackby(obj/item/O as obj, mob/user as mob)
 	if(busy)
-		user << "<span class='warning'>Someone's already washing here."
+		user << "\red Someone's already washing here."
 		return
 
 	var/obj/item/weapon/reagent_containers/RG = O
 	if (istype(RG) && RG.is_open_container())
 		RG.reagents.add_reagent("water", min(RG.volume - RG.reagents.total_volume, RG.amount_per_transfer_from_this))
-		user.visible_message("<span class='notice'>[user] fills \the [RG] using \the [src].</span>","<span class='notice'>You fill \the [RG] using \the [src].</span>")
+		user.visible_message("\blue [user] fills \the [RG] using \the [src].","\blue You fill \the [RG] using \the [src].")
 		return
 
 	else if (istype(O, /obj/item/weapon/melee/baton))
@@ -415,7 +414,7 @@
 	var/obj/item/I = O
 	if(!I || !istype(I,/obj/item)) return
 
-	usr << "<span class='notice'>You start washing \the [I].</span>"
+	usr << "\blue You start washing \the [I]."
 
 	busy = 1
 	sleep(40)
@@ -427,8 +426,8 @@
 
 	O.clean_blood()
 	user.visible_message( \
-		"<span class='notice'>[user] washes \a [I] using \the [src].</span>", \
-		"<span class='notice'>You wash \a [I] using \the [src].</span>")
+		"\blue [user] washes \a [I] using \the [src].", \
+		"\blue You wash \a [I] using \the [src].")
 
 
 /obj/structure/sink/kitchen

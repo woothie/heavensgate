@@ -10,7 +10,6 @@
 	//Status updates, death etc.
 	clamp_values()
 	handle_regular_status_updates()
-	handle_actions()
 
 	if(client)
 		handle_regular_hud_updates()
@@ -59,7 +58,7 @@
 		src.has_power = 0
 		if(lights_on) // Light is on but there is no power!
 			lights_on = 0
-			set_light(0)
+			SetLuminosity(0)
 
 /mob/living/silicon/robot/proc/handle_regular_status_updates()
 
@@ -223,15 +222,16 @@
 			src.healths.icon_state = "health7"
 
 	if (src.syndicate && src.client)
-		for(var/datum/mind/tra in traitors.current_antagonists)
-			if(tra.current)
-				var/I = image('icons/mob/mob.dmi', loc = tra.current, icon_state = "traitor")
-				src.client.images += I
+		if(ticker.mode.name == "traitor")
+			for(var/datum/mind/tra in ticker.mode.traitors)
+				if(tra.current)
+					var/I = image('icons/mob/mob.dmi', loc = tra.current, icon_state = "traitor")
+					src.client.images += I
 		src.disconnect_from_ai()
 		if(src.mind)
 			if(!src.mind.special_role)
 				src.mind.special_role = "traitor"
-				traitors.current_antagonists |= src.mind
+				ticker.mode.traitors += src.mind
 
 	if (src.cells)
 		if (src.cell)

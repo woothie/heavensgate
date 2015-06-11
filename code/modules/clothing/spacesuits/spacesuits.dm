@@ -20,7 +20,6 @@
 	var/obj/machinery/camera/camera
 	var/list/camera_networks
 
-	action_button_name = "Toggle Helmet Light"
 	light_overlay = "helmet_light"
 	brightness_on = 4
 	on = 0
@@ -29,11 +28,13 @@
 
 	if(!camera && camera_networks)
 
+		if(!icon_action_button)
+			icon_action_button = "[icon_state]"
+
 		camera = new /obj/machinery/camera(src)
 		camera.replace_networks(camera_networks)
 		camera.c_tag = user.name
 		user << "\blue User scanned as [camera.c_tag]. Camera activated."
-		user.update_action_buttons()
 		return 1
 
 	..()
@@ -75,7 +76,7 @@
 // Some space suits are equipped with reactive membranes that support
 // broken limbs - at the time of writing, only the ninja suit, but
 // I can see it being useful for other suits as we expand them. ~ Z
-// The actual splinting occurs in /obj/item/organ/external/proc/fracture()
+// The actual splinting occurs in /datum/organ/external/proc/fracture()
 /obj/item/clothing/suit/space/proc/check_limb_support(var/mob/living/carbon/human/user)
 
 	// If this isn't set, then we don't need to care.
@@ -86,7 +87,7 @@
 		return
 
 	// Otherwise, remove the splints.
-	for(var/obj/item/organ/external/E in supporting_limbs)
+	for(var/datum/organ/external/E in supporting_limbs)
 		E.status &= ~ ORGAN_SPLINTED
-		user << "The suit stops supporting your [E.name]."
+		user << "The suit stops supporting your [E.display_name]."
 	supporting_limbs = list()

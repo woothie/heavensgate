@@ -80,14 +80,14 @@ var/const/tk_maxrange = 15
 			if(focus.Adjacent(loc))
 				focus.loc = loc
 
-		qdel(src)
+		del(src)
 		return
 
 
 	//stops TK grabs being equipped anywhere but into hands
 	equipped(var/mob/user, var/slot)
 		if( (slot == slot_l_hand) || (slot== slot_r_hand) )	return
-		qdel(src)
+		del(src)
 		return
 
 
@@ -99,10 +99,10 @@ var/const/tk_maxrange = 15
 		if(!target || !user)	return
 		if(last_throw+3 > world.time)	return
 		if(!host || host != user)
-			qdel(src)
+			del(src)
 			return
 		if(!(TK in host.mutations))
-			qdel(src)
+			del(src)
 			return
 		if(isobj(target) && !isturf(target.loc))
 			return
@@ -120,7 +120,7 @@ var/const/tk_maxrange = 15
 			if(8 to tk_maxrange)
 				user.next_move += 10
 			else
-				user << "<span class='notice'>Your mind won't reach that far.</span>"
+				user << "\blue Your mind won't reach that far."
 				return
 
 		if(!focus)
@@ -152,7 +152,7 @@ var/const/tk_maxrange = 15
 	proc/focus_object(var/obj/target, var/mob/living/user)
 		if(!istype(target,/obj))	return//Cant throw non objects atm might let it do mobs later
 		if(target.anchored || !isturf(target.loc))
-			qdel(src)
+			del src
 			return
 		focus = target
 		update_icon()
@@ -162,7 +162,7 @@ var/const/tk_maxrange = 15
 
 	proc/apply_focus_overlay()
 		if(!focus)	return
-		var/obj/effect/overlay/O = PoolOrNew(/obj/effect/overlay, locate(focus.x,focus.y,focus.z))
+		var/obj/effect/overlay/O = new /obj/effect/overlay(locate(focus.x,focus.y,focus.z))
 		O.name = "sparkles"
 		O.anchored = 1
 		O.density = 0
@@ -172,7 +172,7 @@ var/const/tk_maxrange = 15
 		O.icon_state = "nothing"
 		flick("empdisable",O)
 		spawn(5)
-			qdel(O)
+			O.delete()
 		return
 
 

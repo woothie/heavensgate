@@ -131,12 +131,12 @@
 /obj/item/weapon/circuitboard/cryopodcontrol
 	name = "Circuit board (Cryogenic Oversight Console)"
 	build_path = "/obj/machinery/computer/cryopod"
-	origin_tech = list(TECH_DATA = 3)
+	origin_tech = "programming=3"
 
 /obj/item/weapon/circuitboard/robotstoragecontrol
 	name = "Circuit board (Robotic Storage Console)"
 	build_path = "/obj/machinery/computer/cryopod/robot"
-	origin_tech = list(TECH_DATA = 3)
+	origin_tech = "programming=3"
 
 //Decorative structures to go alongside cryopods.
 /obj/structure/cryofeed
@@ -175,7 +175,7 @@
 	var/on_store_message = "has entered long-term storage."
 	var/on_store_name = "Cryogenic Oversight"
 	var/on_enter_occupant_message = "You feel cool air surround you. You go numb as your senses turn inward."
-	var/allow_occupant_types = list(/mob/living/carbon/human)
+	var/allow_occupant_types = list(/mob/living/carbon/human, /mob/living/carbon/monkey)
 	var/disallow_occupant_types = list()
 
 	var/mob/occupant = null       // Person waiting to be despawned.
@@ -234,7 +234,7 @@
 
 	..()
 
-/obj/machinery/cryopod/Destroy()
+/obj/machinery/cryopod/Del()
 	if(occupant)
 		occupant.loc = loc
 		occupant.resting = 1
@@ -291,12 +291,12 @@
 	var/mob/living/silicon/robot/R = occupant
 	if(!istype(R)) return ..()
 
-	qdel(R.mmi)
+	del(R.mmi)
 	for(var/obj/item/I in R.module) // the tools the borg has; metal, glass, guns etc
 		for(var/obj/item/O in I) // the things inside the tools, if anything; mainly for janiborg trash bags
 			O.loc = R
-		qdel(I)
-	qdel(R.module)
+		del(I)
+	del(R.module)
 
 	return ..()
 
@@ -308,7 +308,7 @@
 		occupant.drop_from_inventory(W)
 		W.loc = src
 
-		if(W.contents.len) //Make sure we catch anything not handled by qdel() on the items.
+		if(W.contents.len) //Make sure we catch anything not handled by del() on the items.
 			for(var/obj/item/O in W.contents)
 				if(istype(O,/obj/item/weapon/storage/internal)) //Stop eating pockets, you fuck!
 					continue
@@ -328,7 +328,7 @@
 				break
 
 		if(!preserve)
-			qdel(W)
+			del(W)
 		else
 			if(control_computer && control_computer.allow_items)
 				control_computer.frozen_items += W
@@ -341,7 +341,7 @@
 		// We don't want revs to get objectives that aren't for heads of staff. Letting
 		// them win or lose based on cryo is silly so we remove the objective.
 		if(istype(O,/datum/objective/mutiny) && O.target == occupant.mind)
-			qdel(O)
+			del(O)
 		else if(O.target && istype(O.target,/datum/mind))
 			if(O.target == occupant.mind)
 				if(O.owner && O.owner.current)
@@ -353,7 +353,7 @@
 					if(!(O.target))
 						all_objectives -= O
 						O.owner.objectives -= O
-						qdel(O)
+						del(O)
 
 	//Handle job slot/tater cleanup.
 	var/job = occupant.mind.assigned_role
@@ -361,12 +361,12 @@
 	job_master.FreeRole(job)
 
 	if(occupant.mind.objectives.len)
-		qdel(occupant.mind.objectives)
+		del(occupant.mind.objectives)
 		occupant.mind.special_role = null
-	//else
-		//if(ticker.mode.name == "AutoTraitor")
-			//var/datum/game_mode/traitor/autotraitor/current_mode = ticker.mode
-			//current_mode.possible_traitors.Remove(occupant)
+	else
+		if(ticker.mode.name == "AutoTraitor")
+			var/datum/game_mode/traitor/autotraitor/current_mode = ticker.mode
+			current_mode.possible_traitors.Remove(occupant)
 
 	// Delete them from datacore.
 
@@ -374,13 +374,13 @@
 		PDA_Manifest.Cut()
 	for(var/datum/data/record/R in data_core.medical)
 		if ((R.fields["name"] == occupant.real_name))
-			qdel(R)
+			del(R)
 	for(var/datum/data/record/T in data_core.security)
 		if ((T.fields["name"] == occupant.real_name))
-			qdel(T)
+			del(T)
 	for(var/datum/data/record/G in data_core.general)
 		if ((G.fields["name"] == occupant.real_name))
-			qdel(G)
+			del(G)
 
 	if(orient_right)
 		icon_state = "[base_icon_state]-r"
@@ -399,7 +399,7 @@
 	visible_message("<span class='notice'>\The [initial(name)] hums and hisses as it moves [occupant.real_name] into storage.</span>", 3)
 
 	// Delete the mob.
-	qdel(occupant)
+	del(occupant)
 	set_occupant(null)
 
 

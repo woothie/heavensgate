@@ -47,7 +47,7 @@
 		user << "You insert the rod into the injector"
 		injecting = 1
 		var/fuel = F.fuel
-		qdel(F)
+		del(F)
 		spawn( 300 )
 			injecting = 0
 			new/obj/item/weapon/fuel(src.loc)
@@ -60,7 +60,7 @@
 		user << "You insert the rod into the injector"
 		injecting = 1
 		var/fuel = F.fuel
-		qdel(F)
+		del(F)
 		spawn( 300 )
 			injecting = 0
 			new /obj/item/weapon/fuel(src.loc)
