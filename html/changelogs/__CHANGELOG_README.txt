@@ -16,4 +16,21 @@ TO MAKE A CHANGELOG .YML ENTRRY
 
 #######################################################
 
+VALID PREFIXES
+
+bugfix       for fixes
+wip          for works in progress
+tweak        for tweak to existing functionality
+soundadd     added media files
+sounddel     removed media files
+rscadd       general deleting of nice things
+rscdel       general adding of nice things
+imageadd     added image or sprite file
+imagedel     removed image or sprite file
+maptweak     for tweaks to the map
+spellcheck   for fixes of spelling
+experiment   for experimental features
+
+#######################################################
+
 If you have trouble ask for help in #codershuttle on irc.sorcery.net or read https://tgstation13.org/wiki/Guide_to_Changelogs

@@ -1,6 +1,6 @@
 '''
 Usage:
-    $ python ss13_genchangelog.py [--dry-run] html/changelog.html html/changelogs/
+    $ python ss13_genchangelog.py [--dry-run] html/changelog.html html/changelogs/ [-changelogCache .baystation_changelog.yml .nullstation_changelog.yml]
 
 ss13_genchangelog.py - Generate changelog from YAML.
 
@@ -38,10 +38,14 @@ opt = argparse.ArgumentParser()
 opt.add_argument('-d', '--dry-run', dest='dryRun', default=False, action='store_true', help='Only parse changelogs and, if needed, the targetFile. (A .dry_changelog.yml will be output for debugging purposes.)')
 opt.add_argument('targetFile', help='The HTML changelog we wish to update.')
 opt.add_argument('ymlDir', help='The directory of YAML changelogs we will use.')
+opt.add_argument('-changelogCache', help='The changelog cache we will update.', default='.baystation_changelog.yml .nullstation_changelog.yml')
 
 args = opt.parse_args()
 
+changelog_caches = args.changelogCache.split(' ')
+
 all_changelog_entries = {}
+local_changelog_entries = {}
 
 validPrefixes = [
     'bugfix',
@@ -61,34 +65,48 @@ validPrefixes = [
 def dictToTuples(inp):
     return [(k, v) for k, v in inp.items()]
 
+def readCacheFile(changelog_cache, isLocal):
+    failed = True
+    changelog_entries = {}
+    if os.path.isfile(changelog_cache):
+        try:
+            with open(changelog_cache) as f:
+                (_, changelog_entries) = yaml.load_all(f)
+                failed = False
+            
+                # Convert old timestamps to newer format.
+                new_entries = {}
+                for _date in changelog_entries.keys():
+                    ty = type(_date).__name__
+                    # print(ty)
+                    if ty in ['str', 'unicode']:
+                        temp_data = changelog_entries[_date]
+                        _date = datetime.strptime(_date, dateformat).date()
+                        new_entries[_date] = temp_data
+                    else:
+                        new_entries[_date] = changelog_entries[_date]
+                changelog_entries = new_entries
+        except Exception as e:
+            print("Failed to read cache:")
+            print(e, file=sys.stderr)
+    
+    all_changelog_entries.update(changelog_entries)
+    
+    if isLocal: local_changelog_entries.update(changelog_entries)
+
+    return failed
+
+changelog_caches_length = len(changelog_caches)
+failed_cache_read = True
+
+for i in range(changelog_caches_length):
+    if not readCacheFile(os.path.join(args.ymlDir, changelog_caches[i]), i == changelog_caches_length - 1): failed_cache_read = False
+
 changelog_cache = os.path.join(args.ymlDir, '.all_changelog.yml')
 
-failed_cache_read = True
-if os.path.isfile(changelog_cache):
-    try:
-        with open(changelog_cache) as f:
-            (_, all_changelog_entries) = yaml.load_all(f)
-            failed_cache_read = False
-            
-            # Convert old timestamps to newer format.
-            new_entries = {}
-            for _date in all_changelog_entries.keys():
-                ty = type(_date).__name__
-                # print(ty)
-                if ty in ['str', 'unicode']:
-                    temp_data = all_changelog_entries[_date]
-                    _date = datetime.strptime(_date, dateformat).date()
-                    new_entries[_date] = temp_data
-                else:
-                    new_entries[_date] = all_changelog_entries[_date]
-            all_changelog_entries = new_entries
-    except Exception as e:
-        print("Failed to read cache:")
-        print(e, file=sys.stderr)
-        
 if args.dryRun: 
     changelog_cache = os.path.join(args.ymlDir, '.dry_changelog.yml')
-    
+
 if failed_cache_read and os.path.isfile(args.targetFile):
     from bs4 import BeautifulSoup
     from bs4.element import NavigableString
@@ -139,6 +157,8 @@ for fileName in glob.glob(os.path.join(args.ymlDir, "*.yml")):
         f.close()
     if today not in all_changelog_entries:
         all_changelog_entries[today] = {}
+    if today not in local_changelog_entries:
+        local_changelog_entries[today] = {}
     author_entries = all_changelog_entries[today].get(cl['author'], [])
     if len(cl['changes']):
         new = 0
@@ -150,6 +170,7 @@ for fileName in glob.glob(os.path.join(args.ymlDir, "*.yml")):
                 author_entries += [change]
                 new += 1
         all_changelog_entries[today][cl['author']] = author_entries 
+        local_changelog_entries[today][cl['author']] = author_entries 
         if new > 0:
             print('  Added {0} new changelog entries.'.format(new))
         
@@ -196,7 +217,10 @@ with open(args.targetFile.replace('.htm', '.dry.htm') if args.dryRun else args.t
     with open(os.path.join(targetDir, 'templates', 'footer.html'), 'r') as h:
         for line in h:
             changelog.write(line)
-            
+
+with open(os.path.join(args.ymlDir, changelog_caches[changelog_caches_length - 1]), 'w') as f:
+    cache_head = 'DO NOT EDIT THIS FILE BY HAND!  AUTOMATICALLY GENERATED BY ss13_genchangelog.py.'
+    yaml.dump_all([cache_head, local_changelog_entries], f, default_flow_style=False)
 
 with open(changelog_cache, 'w') as f:
     cache_head = 'DO NOT EDIT THIS FILE BY HAND!  AUTOMATICALLY GENERATED BY ss13_genchangelog.py.'
