@@ -206,7 +206,6 @@
 #include "code\game\supplyshuttle.dm"
 #include "code\game\area\ai_monitored.dm"
 #include "code\game\area\areas.dm"
-#include "code\game\area\Space Station 13 areas.dm"
 #include "code\game\dna\dna2.dm"
 #include "code\game\dna\dna2_domutcheck.dm"
 #include "code\game\dna\dna2_helpers.dm"
@@ -1583,8 +1582,10 @@
 #include "code\ZAS\Zone.dm"
 #include "interface\interface.dm"
 #include "interface\skin.dmf"
+#include "nullstation\code\game\area\areas_definition.dm"
 // END_INCLUDE
 #ifdef __MAIN__
+#include "nullstation\code\game\area\areas_standard.dm"
 #include "maps\exodus-1.dmm"
 #include "maps\exodus-2.dmm"
 #include "maps\exodus-3.dmm"
