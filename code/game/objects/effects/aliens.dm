@@ -355,21 +355,21 @@ Alien plants should do something if theres a lot of poison
 /obj/effect/alien/egg/attack_hand(user as mob)
 
 	var/mob/living/carbon/M = user
-	if(!istype(M) || !(locate(/datum/organ/internal/xenos/hivenode) in M.internal_organs))
-		return attack_hand(user)
-
-	switch(status)
-		if(BURST)
-			user << "\red You clear the hatched egg."
-			del(src)
-			return
-		if(GROWING)
-			user << "\red The child is not developed yet."
-			return
-		if(GROWN)
-			user << "\red You retrieve the child."
-			Burst(0)
-			return
+	if(istype(M) && (locate(/datum/organ/internal/xenos/hivenode) in M.internal_organs))
+		switch(status)
+			if(BURST)
+				user << "\red You clear the hatched egg."
+				del(src)
+				return
+			if(GROWING)
+				user << "\red The child is not developed yet."
+				return
+			if(GROWN)
+				user << "\red You retrieve the child."
+				Burst(0)
+				return
+	else
+		return ..()
 
 /obj/effect/alien/egg/proc/GetFacehugger()
 	return locate(/obj/item/clothing/mask/facehugger) in contents
