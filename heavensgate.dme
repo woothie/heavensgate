@@ -8,4 +8,12 @@
 // END_PREFERENCES
 // BEGIN_INCLUDE
 #include "heavensgate\code\minor_modifications.dm"
+#include "heavensgate\code\game\area\areas.dm"
+#include "heavensgate\code\game\area\rust_areas.dm"
+#include "heavensgate\maps\exodus-1.dmm"
+#include "heavensgate\maps\exodus-2.dmm"
+#include "heavensgate\maps\exodus-3.dmm"
+#include "heavensgate\maps\exodus-4.dmm"
+#include "heavensgate\maps\exodus-5.dmm"
+#include "heavensgate\maps\exodus-6.dmm"
 // END_INCLUDE
