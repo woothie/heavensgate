@@ -13,3 +13,8 @@
 ///turf/simulated/floor/steps
 //	name = "steps"
 //	icon_state = "ramptop"
+
+/datum/preferences/spawnpoint = "Cryogenic Storage"
+
+/datum/spawnpoint/cryo
+	msg = "has completed cryogenic transfer"
